@@ -269,6 +269,9 @@ public class ThreadLocal<T> {
          * as "stale entries" in the code that follows.
          */
         static class Entry extends WeakReference<ThreadLocal> {
+            //Entry继承WeakReference的意义在于当使用者使用完ThreadLocal对象后忘记释放掉该对象，也可以被GC回收。
+            //比如说某个ThreadLocal对象的生命周期已经完成了，但是数组还会继续引用该ThreadLocal对象直至该线程销毁。
+            // 但是使用了WeakReference，在仅剩弱引用时GC就可以回收该对象。这样设计是尽最大的可能避免垃圾对象的堆积。
             /** The value associated with this ThreadLocal. */
             Object value;
 

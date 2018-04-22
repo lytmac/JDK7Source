@@ -1442,7 +1442,7 @@ public final class String
      *
      * @return  a hash code value for this object.
      */
-    public int hashCode() {
+    public int hashCode() { //可以充分利用 String 字符串的每一位，这样做可以保证不同字符串的 hashCode 最大程度上不同
         int h = hash;
         if (h == 0 && value.length > 0) {
             char val[] = value;

@@ -354,7 +354,7 @@ public class LinkedBlockingDeque<E>
         if (e == null) throw new NullPointerException();
         Node<E> node = new Node<E>(e);
         final ReentrantLock lock = this.lock;
-        lock.lock();
+        lock.lock(); //这里上锁，存在竞态条件。
         try {
             return linkLast(node);
         } finally {
@@ -631,6 +631,11 @@ public class LinkedBlockingDeque<E>
         addLast(e);
         return true;
     }
+
+
+    /**
+     * offer()和 put()都是将元素加入到队尾，区别在于队列已满的情况下，offer直接返回失败，put会一直等待
+     */
 
     /**
      * @throws NullPointerException if the specified element is null

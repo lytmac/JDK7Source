@@ -2002,7 +2002,7 @@ public class Collections {
     /**
      * @serial include
      */
-    private static class SynchronizedMap<K,V>
+    private static class SynchronizedMap<K,V> //迭代还是会抛出线程
         implements Map<K,V>, Serializable {
         private static final long serialVersionUID = 1978198479659022715L;
 

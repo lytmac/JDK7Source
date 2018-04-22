@@ -357,7 +357,7 @@ public class HashMap<K,V>
      * otherwise encounter collisions for hashCodes that do not differ
      * in lower bits. Note: Null keys always map to hash 0, thus index 0.
      */
-    final int hash(Object k) {
+    final int hash(Object k) { //扰动函数，为了尽可能的降低hash碰撞的可能。
         int h = hashSeed;
         if (0 != h && k instanceof String) {
             return sun.misc.Hashing.stringHash32((String) k);
@@ -368,6 +368,8 @@ public class HashMap<K,V>
         // This function ensures that hashCodes that differ only by
         // constant multiples at each bit position have a bounded
         // number of collisions (approximately 8 at default load factor).
+
+        //做了4次位移动运算。这样在做indexFor时，高位的变化就一定程度上会体现出来了。
         h ^= (h >>> 20) ^ (h >>> 12);
         return h ^ (h >>> 7) ^ (h >>> 4);
     }
@@ -377,6 +379,7 @@ public class HashMap<K,V>
      */
     static int indexFor(int h, int length) {
         // assert Integer.bitCount(length) == 1 : "length must be a non-zero power of 2";
+        //这里要注意一下：hashMap的数组长度应该是2^n
         return h & (length-1);
     }
 
@@ -488,7 +491,7 @@ public class HashMap<K,V>
      *         previously associated <tt>null</tt> with <tt>key</tt>.)
      */
     public V put(K key, V value) {
-        if (table == EMPTY_TABLE) {
+        if (table == EMPTY_TABLE) { //如果是空table,重新扩容
             inflateTable(threshold);
         }
         if (key == null)
@@ -497,7 +500,7 @@ public class HashMap<K,V>
         int i = indexFor(hash, table.length);
         for (Entry<K,V> e = table[i]; e != null; e = e.next) {
             Object k;
-            if (e.hash == hash && ((k = e.key) == key || key.equals(k))) {
+            if (e.hash == hash && ((k = e.key) == key || key.equals(k))) { //如果已存在key，则后插入的Entry覆盖掉原有的value.
                 V oldValue = e.value;
                 e.value = value;
                 e.recordAccess(this);
@@ -514,6 +517,7 @@ public class HashMap<K,V>
      * Offloaded version of put for null keys
      */
     private V putForNullKey(V value) {
+        //遍历整个table，如已存在key == null的元素，则进行替换，并返回原value值
         for (Entry<K,V> e = table[0]; e != null; e = e.next) {
             if (e.key == null) {
                 V oldValue = e.value;
@@ -523,7 +527,7 @@ public class HashMap<K,V>
             }
         }
         modCount++;
-        addEntry(0, null, value, 0);
+        addEntry(0, null, value, 0);   //首次加入key=null的Entry
         return null;
     }
 
