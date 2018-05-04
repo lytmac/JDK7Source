@@ -60,7 +60,7 @@ public final class Integer extends Number implements Comparable<Integer> {
      * A constant holding the maximum value an {@code int} can
      * have, 2<sup>31</sup>-1.
      */
-    public static final int   MAX_VALUE = 0x7fffffff;
+    public static final int   MAX_VALUE = 0x7fffffff;  //2 ^ 32 -1
 
     /**
      * The {@code Class} instance representing the primitive type

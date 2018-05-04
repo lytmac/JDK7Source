@@ -1,3 +1,4 @@
+
 /*
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
@@ -166,7 +167,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      * The maximum number of segments to allow; used to bound
      * constructor arguments. Must be power of two less than 1 << 24.
      */
-    static final int MAX_SEGMENTS = 1 << 16; // slightly conservative
+    static final int MAX_SEGMENTS = 1 << 16; // slightly conservative 2^16
 
     /**
      * Number of unsynchronized retries in size and containsValue
@@ -239,12 +240,12 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      * Mask value for indexing into segments. The upper bits of a
      * key's hash code are used to choose the segment.
      */
-    final int segmentMask;
+    final int segmentMask;  // 用于定位段，大小等于segments.length - 1，是不可变的
 
     /**
      * Shift value for indexing within segments.
      */
-    final int segmentShift;
+    final int segmentShift; // 用于定位段，大小等于32(hash值的位数)减去对segments的大小取以2为底的对数值，是不可变的
 
     /**
      * The segments, each of which is a specialized hash table.
@@ -260,9 +261,9 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      * out as a user-visible Map.Entry.
      */
     static final class HashEntry<K,V> {
-        final int hash;
+        final int hash;  //因为hash值一旦计算出来，到其生命周期完成都不会再变了
         final K key;
-        volatile V value;
+        volatile V value; //为了保证value再多线程访问的可见性
         volatile HashEntry<K,V> next;
 
         HashEntry(int hash, K key, V value, HashEntry<K,V> next) {
@@ -383,19 +384,20 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
          * number of retries maintains cache acquired while locating
          * nodes.
          */
-        static final int MAX_SCAN_RETRIES =
-            Runtime.getRuntime().availableProcessors() > 1 ? 64 : 1;
+        static final int MAX_SCAN_RETRIES = Runtime.getRuntime().availableProcessors() > 1 ? 64 : 1;
 
         /**
          * The per-segment table. Elements are accessed via
          * entryAt/setEntryAt providing volatile semantics.
          */
-        transient volatile HashEntry<K,V>[] table;
+        transient volatile HashEntry<K,V>[] table; //分段的桶
 
         /**
          * The number of elements. Accessed only either within locks
          * or among other volatile reads that maintain visibility.
          */
+        //统计的是每个Segment管理的Entry的数量。
+        //不在ConcurrentHashMap中使用全局的计数器是为了避免出现热点域而影响并发性。因为当需要更新计数器时，不用锁定整个ConcurrentHashMap
         transient int count;
 
         /**
@@ -405,7 +407,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
          * and size() methods.  Accessed only either within locks or
          * among other volatile reads that maintain visibility.
          */
-        transient int modCount;
+        transient int modCount; //用于统计段结构改变的次数，主要是为了检测对多个段进行遍历过程中某个段是否发生改变
 
         /**
          * The table is rehashed when its size exceeds this threshold.
@@ -798,20 +800,19 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      * nonpositive.
      */
     @SuppressWarnings("unchecked")
-    public ConcurrentHashMap(int initialCapacity,
-                             float loadFactor, int concurrencyLevel) {
+    public ConcurrentHashMap(int initialCapacity, float loadFactor, int concurrencyLevel) {
         if (!(loadFactor > 0) || initialCapacity < 0 || concurrencyLevel <= 0)
             throw new IllegalArgumentException();
-        if (concurrencyLevel > MAX_SEGMENTS)
+        if (concurrencyLevel > MAX_SEGMENTS)  //MAX_SEGMENTS = 2^16
             concurrencyLevel = MAX_SEGMENTS;
         // Find power-of-two sizes best matching arguments
         int sshift = 0;
         int ssize = 1;
-        while (ssize < concurrencyLevel) {
-            ++sshift;
-            ssize <<= 1;
+        while (ssize < concurrencyLevel) { //因为MAX_SEGMENTS = 2^16，所以左移次数最多为16
+            ++sshift;    //sshift最终为ssize的左移位数,如默认并发度为16，sshift即为4
+            ssize <<= 1; //ssize最终为小于concurrencyLevel的最大2的倍数
         }
-        this.segmentShift = 32 - sshift;
+        this.segmentShift = 32 - sshift; //segmentShift初始化为32(hash的长度)-
         this.segmentMask = ssize - 1;
         if (initialCapacity > MAXIMUM_CAPACITY)
             initialCapacity = MAXIMUM_CAPACITY;
@@ -822,9 +823,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
         while (cap < c)
             cap <<= 1;
         // create segments and segments[0]
-        Segment<K,V> s0 =
-            new Segment<K,V>(loadFactor, (int)(cap * loadFactor),
-                             (HashEntry<K,V>[])new HashEntry[cap]);
+        Segment<K,V> s0 = new Segment<K,V>(loadFactor, (int)(cap * loadFactor), (HashEntry<K,V>[])new HashEntry[cap]);
         Segment<K,V>[] ss = (Segment<K,V>[])new Segment[ssize];
         UNSAFE.putOrderedObject(ss, SBASE, s0); // ordered write of segments[0]
         this.segments = ss;
@@ -878,9 +877,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      * @param m the map
      */
     public ConcurrentHashMap(Map<? extends K, ? extends V> m) {
-        this(Math.max((int) (m.size() / DEFAULT_LOAD_FACTOR) + 1,
-                      DEFAULT_INITIAL_CAPACITY),
-             DEFAULT_LOAD_FACTOR, DEFAULT_CONCURRENCY_LEVEL);
+        this(Math.max((int) (m.size() / DEFAULT_LOAD_FACTOR) + 1, DEFAULT_INITIAL_CAPACITY), DEFAULT_LOAD_FACTOR, DEFAULT_CONCURRENCY_LEVEL);
         putAll(m);
     }
 
@@ -987,11 +984,8 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
         HashEntry<K,V>[] tab;
         int h = hash(key);
         long u = (((h >>> segmentShift) & segmentMask) << SSHIFT) + SBASE;
-        if ((s = (Segment<K,V>)UNSAFE.getObjectVolatile(segments, u)) != null &&
-            (tab = s.table) != null) {
-            for (HashEntry<K,V> e = (HashEntry<K,V>) UNSAFE.getObjectVolatile
-                     (tab, ((long)(((tab.length - 1) & h)) << TSHIFT) + TBASE);
-                 e != null; e = e.next) {
+        if ((s = (Segment<K,V>)UNSAFE.getObjectVolatile(segments, u)) != null && (tab = s.table) != null) {
+            for (HashEntry<K,V> e = (HashEntry<K,V>) UNSAFE.getObjectVolatile(tab, ((long)(((tab.length - 1) & h)) << TSHIFT) + TBASE); e != null; e = e.next) {
                 K k;
                 if ((k = e.key) == key || (e.hash == h && key.equals(k)))
                     return e.value;
@@ -1120,12 +1114,12 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
     @SuppressWarnings("unchecked")
     public V put(K key, V value) {
         Segment<K,V> s;
-        if (value == null)
+        if (value == null) //ConcurrentHashMap不允许value为null
             throw new NullPointerException();
         int hash = hash(key);
-        int j = (hash >>> segmentShift) & segmentMask;
-        if ((s = (Segment<K,V>)UNSAFE.getObject          // nonvolatile; recheck
-             (segments, (j << SSHIFT) + SBASE)) == null) //  in ensureSegment
+        int j = (hash >>> segmentShift) & segmentMask;   //计算段的下标，
+        if ((s = (Segment<K,V>)UNSAFE.getObject(segments, (j << SSHIFT) + SBASE)) == null)       // nonvolatile; recheck
+              //  in ensureSegment
             s = ensureSegment(j);
         return s.put(key, hash, value, false);
     }

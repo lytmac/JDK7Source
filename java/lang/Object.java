@@ -147,6 +147,7 @@ public class Object {
      * @see     java.util.HashMap
      */
     public boolean equals(Object obj) {
+        //重写equals()，先比较地址，再比较类型，最后比较内容
         return (this == obj);
     }
 

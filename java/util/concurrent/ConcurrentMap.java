@@ -85,7 +85,7 @@ public interface ConcurrentMap<K, V> extends Map<K, V> {
      *         or value prevents it from being stored in this map
      *
      */
-    V putIfAbsent(K key, V value);
+    V putIfAbsent(K key, V value); //仅当key没有对应的映射值时才插入
 
     /**
      * Removes the entry for a key only if currently mapped to a given value.
@@ -109,7 +109,7 @@ public interface ConcurrentMap<K, V> extends Map<K, V> {
      *         and this map does not permit null keys or values
      *         (<a href="../Collection.html#optional-restrictions">optional</a>)
      */
-    boolean remove(Object key, Object value);
+    boolean remove(Object key, Object value); //仅当存在key,value映射关系时才删除
 
     /**
      * Replaces the entry for a key only if currently mapped to a given value.
@@ -134,7 +134,7 @@ public interface ConcurrentMap<K, V> extends Map<K, V> {
      * @throws IllegalArgumentException if some property of a specified key
      *         or value prevents it from being stored in this map
      */
-    boolean replace(K key, V oldValue, V newValue);
+    boolean replace(K key, V oldValue, V newValue); //仅当存在key,oldValue映射关系时才将映射关系改为key,newValue
 
     /**
      * Replaces the entry for a key only if currently mapped to some value.
@@ -161,5 +161,5 @@ public interface ConcurrentMap<K, V> extends Map<K, V> {
      * @throws IllegalArgumentException if some property of the specified key
      *         or value prevents it from being stored in this map
      */
-    V replace(K key, V value);
+    V replace(K key, V value); //仅当存在key存在映射关系时才将映射关系改为key,newValue
 }

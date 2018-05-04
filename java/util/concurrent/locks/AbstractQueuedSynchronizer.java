@@ -519,13 +519,13 @@ public abstract class AbstractQueuedSynchronizer
      * If head exists, its waitStatus is guaranteed not to be
      * CANCELLED.
      */
-    private transient volatile Node head;
+    private transient volatile Node head; //default null
 
     /**
      * Tail of the wait queue, lazily initialized.  Modified only via
      * method enq to add new wait node.
      */
-    private transient volatile Node tail;
+    private transient volatile Node tail; //default null
 
     /**
      * The synchronization state.
@@ -1208,8 +1208,8 @@ public abstract class AbstractQueuedSynchronizer
      *        can represent anything you like.
      */
     public final void acquire(int arg) {
-        if (!tryAcquire(arg) && acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
-            //在获取同步状态失败的情况下，首先将该节点加入队尾，判断此时前序节点是不是首节点，如果是则再做最后一次获取同步状态的尝试。尝试失败则将本线程挂起
+        if (!tryAcquire(arg) //由子类定义如何尝试获取同步状态
+                && acquireQueued(addWaiter(Node.EXCLUSIVE), arg)) //在获取同步状态失败的情况下，首先将该节点加入队尾，判断此时前序节点是不是首节点，如果是则再做最后一次获取同步状态的尝试。尝试失败则将本线程挂起
 
             //只是将本线程标记为已中断，线程实际并没有被中断。那么在哪里会中断该线程呢？
             selfInterrupt();
@@ -1531,6 +1531,11 @@ public abstract class AbstractQueuedSynchronizer
         Node t = tail; // Read fields in reverse initialization order
         Node h = head;
         Node s;
+
+        /**
+         *
+         */
+
         return h != t &&  // h != t 表明队列已经初始化了
             ((s = h.next) == null || s.thread != Thread.currentThread());
             // (s = h.next) == null   表面队列为空
