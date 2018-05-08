@@ -153,9 +153,7 @@ public class ReentrantLock implements Lock, java.io.Serializable {
         }
 
         protected final boolean tryRelease(int releases) {
-            /**
-             * 仅当前获取到同步状态的线程才可能尝试释放同步状态，所以这部分的操作无需考虑线程安全
-             */
+            //仅当前获取到同步状态的线程才可能尝试释放同步状态，所以这部分的操作无需考虑线程安全问题
             int c = getState() - releases;
             if (Thread.currentThread() != getExclusiveOwnerThread()) //只有当前线程才有可能释放同步状态
                 throw new IllegalMonitorStateException();
@@ -164,9 +162,8 @@ public class ReentrantLock implements Lock, java.io.Serializable {
                 free = true;
                 setExclusiveOwnerThread(null);
             }
-            /**
-             * 对于可重入锁而言，尝试释放同步状态并不意味着该线程完全释放
-             */
+
+            //对于可重入锁而言，尝试释放同步状态并不等同于该线程完全释放
             setState(c);
             return free;
         }
@@ -250,7 +247,7 @@ public class ReentrantLock implements Lock, java.io.Serializable {
             if (c == 0) {  //目前没有线程占用同步状态
                 //目前队列中并没有前序节点，且获取同步状态成功
                 if (!hasQueuedPredecessors() //先看队列中是否还有元素，若有则直接返回false
-                        && compareAndSetState(0, acquires)) {
+                        && compareAndSetState(0, acquires)) { //这里必须用CAS,因为从getState()获取同步状态到这里修改同步状态是无法保证原子性的。仅保证可见性是不够的。
                     setExclusiveOwnerThread(current);
                     return true;
                 }
@@ -378,6 +375,8 @@ public class ReentrantLock implements Lock, java.io.Serializable {
      * thread; and {@code false} otherwise
      */
     public boolean tryLock() {
+        //仅在当前锁可自有获取(即未被其他线程持有)或已被当前线程获取时返回true。否则返回false。
+        //不会反复重试，也不会入队列等待获取锁。与Synchronized不同的语义。
         return sync.nonfairTryAcquire(1);
     }
 
