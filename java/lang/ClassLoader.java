@@ -195,9 +195,8 @@ public abstract class ClassLoader {
         private ParallelLoaders() {}
 
         // the set of parallel capable loader types
-        private static final Set<Class<? extends ClassLoader>> loaderTypes =
-            Collections.newSetFromMap(
-                new WeakHashMap<Class<? extends ClassLoader>, Boolean>());
+        private static final Set<Class<? extends ClassLoader>> loaderTypes = Collections.newSetFromMap(new WeakHashMap<Class<? extends ClassLoader>, Boolean>());
+
         static {
             synchronized (loaderTypes) { loaderTypes.add(ClassLoader.class); }
         }
@@ -573,6 +572,7 @@ public abstract class ClassLoader {
      * defineClass(String, byte[], int, int)}
      */
     @Deprecated
+    //final修饰表明该方法不能再被重写了。因为没有别的计算方式将字节码转换成Class对象了。
     protected final Class<?> defineClass(byte[] b, int off, int len)
         throws ClassFormatError
     {

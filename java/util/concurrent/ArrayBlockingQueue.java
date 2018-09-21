@@ -84,7 +84,11 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
     private static final long serialVersionUID = -817911632652898426L;
 
     /** The queued items */
-    final Object[] items; //为什么是一个数组？
+    final Object[] items;
+
+    /*================================================================================================================*/
+    // takeIndex、putIndex、count都涉及到线程安全问题，但是并没有通过volatile+CAS确保线程安全性。
+    // 原因就在于所有插入、删除操作都是在加锁的前提下进行的
 
     /** items index for next take, poll, peek or remove */
     int takeIndex;
@@ -93,7 +97,8 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
     int putIndex;
 
     /** Number of elements in the queue */
-    int count;
+    int count;         //队列中实际的元素个数
+    /*================================================================================================================*/
 
     /*
      * Concurrency control uses the classic two-condition algorithm
@@ -109,6 +114,8 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
 
     // Internal helper methods
 
+    /*================================================================================================================*/
+    //无论是takeIndex还是putIndex，都不可能超出items.length。唯一需要注意的是到达临界边际要切换移除或插入的下标
     /**
      * Circularly increment i.
      */
@@ -122,6 +129,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
     final int dec(int i) {
         return ((i == 0) ? items.length : i) - 1;
     }
+    /*================================================================================================================*/
 
     @SuppressWarnings("unchecked")
     static <E> E cast(Object item) {
@@ -149,24 +157,24 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
      * Inserts element at current put position, advances, and signals.
      * Call only when holding lock.
      */
-    private void insert(E x) {
+    private void insert(E x) { //实际执行插入队列操作的函数
         items[putIndex] = x;
         putIndex = inc(putIndex);
         ++count;
-        notEmpty.signal();
+        notEmpty.signal(); //添加元素，阻塞在队列空情况下的线程可以被唤醒
     }
 
     /**
      * Extracts element at current take position, advances, and signals.
      * Call only when holding lock.
      */
-    private E extract() {
+    private E extract() { //实际执行移出队列操作的函数
         final Object[] items = this.items;
         E x = this.<E>cast(items[takeIndex]);
         items[takeIndex] = null;
         takeIndex = inc(takeIndex);
         --count;
-        notFull.signal();
+        notFull.signal(); //移除元素，阻塞在队列满情况下的
         return x;
     }
 
@@ -292,7 +300,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
      *
      * @throws NullPointerException if the specified element is null
      */
-    public boolean offer(E e) {
+    public boolean offer(E e) { //队列满时不会阻塞，直接返回false
         checkNotNull(e);
         final ReentrantLock lock = this.lock;
         lock.lock();
@@ -315,13 +323,14 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
      * @throws InterruptedException {@inheritDoc}
      * @throws NullPointerException {@inheritDoc}
      */
-    public void put(E e) throws InterruptedException {
+    public void put(E e) throws InterruptedException { //队列满时会阻塞，直至被中断或者被唤醒
         checkNotNull(e);
         final ReentrantLock lock = this.lock;
         lock.lockInterruptibly();
         try {
             while (count == items.length)
-                notFull.await();
+                //while循环是Condition的标配，官方文档中指明Condition应该总在一个循环中被等待。
+                notFull.await(); //当前线程挂起在notFull Condition队列
             insert(e);
         } finally {
             lock.unlock();

@@ -159,34 +159,22 @@ class HeapByteBuffer
     }
 
     public ByteBuffer put(byte x) {
-
         hb[ix(nextPutIndex())] = x;
         return this;
-
-
-
     }
 
     public ByteBuffer put(int i, byte x) {
-
         hb[ix(checkIndex(i))] = x;
         return this;
-
-
-
     }
 
     public ByteBuffer put(byte[] src, int offset, int length) {
-
         checkBounds(offset, length, src.length);
         if (length > remaining())
             throw new BufferOverflowException();
         System.arraycopy(src, offset, hb, ix(position()), length);
         position(position() + length);
         return this;
-
-
-
     }
 
     public ByteBuffer put(ByteBuffer src) {
@@ -212,21 +200,14 @@ class HeapByteBuffer
             super.put(src);
         }
         return this;
-
-
-
     }
 
     public ByteBuffer compact() {
-
         System.arraycopy(hb, ix(position()), hb, ix(0), remaining());
         position(remaining());
         limit(capacity());
         discardMark();
         return this;
-
-
-
     }
 
 
@@ -238,11 +219,7 @@ class HeapByteBuffer
     }
 
     void _put(int i, byte b) {                  // package-private
-
         hb[i] = b;
-
-
-
     }
 
     // char
@@ -260,21 +237,13 @@ class HeapByteBuffer
 
 
     public ByteBuffer putChar(char x) {
-
         Bits.putChar(this, ix(nextPutIndex(2)), x, bigEndian);
         return this;
-
-
-
     }
 
     public ByteBuffer putChar(int i, char x) {
-
         Bits.putChar(this, ix(checkIndex(i, 2)), x, bigEndian);
         return this;
-
-
-
     }
 
     public CharBuffer asCharBuffer() {

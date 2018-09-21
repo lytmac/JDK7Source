@@ -574,7 +574,7 @@ class Bits {                            // package-private
         long a = unsafe.allocateMemory(8);
         try {
             unsafe.putLong(a, 0x0102030405060708L);
-            byte b = unsafe.getByte(a);
+            byte b = unsafe.getByte(a); //获取硬件系统的字节顺序
             switch (b) {
             case 0x01: byteOrder = ByteOrder.BIG_ENDIAN;     break;
             case 0x08: byteOrder = ByteOrder.LITTLE_ENDIAN;  break;

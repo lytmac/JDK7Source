@@ -395,6 +395,7 @@ class FileInputStream extends InputStream
     public FileChannel getChannel() {
         synchronized (this) {
             if (channel == null) {
+                //传值文件描述符，文件路径，读(true)以及写(false)的权限。
                 channel = FileChannelImpl.open(fd, path, true, false, this);
 
                 /*

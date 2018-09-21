@@ -180,7 +180,7 @@ public class LockSupport {
      *        thread parking
      * @since 1.6
      */
-    public static void park(Object blocker) {
+    public static void park(Object blocker) { //会释放掉该线程所有已经持有的锁？
         Thread t = Thread.currentThread();
         setBlocker(t, blocker);
         unsafe.park(false, 0L);

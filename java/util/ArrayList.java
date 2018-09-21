@@ -120,7 +120,7 @@ public class ArrayList<E> extends AbstractList<E>
      * empty ArrayList with elementData == EMPTY_ELEMENTDATA will be expanded to
      * DEFAULT_CAPACITY when the first element is added.
      */
-    private transient Object[] elementData;
+    private transient Object[] elementData; //定义为transient，避免被自动序列化。这个数组需要特定的序列化策略，在readObject、writeObject中实现
 
     /**
      * The size of the ArrayList (the number of elements it contains).
@@ -728,8 +728,7 @@ public class ArrayList<E> extends AbstractList<E>
      *             instance is emitted (int), followed by all of its elements
      *             (each an <tt>Object</tt>) in the proper order.
      */
-    private void writeObject(java.io.ObjectOutputStream s)
-        throws java.io.IOException{
+    private void writeObject(java.io.ObjectOutputStream s) throws java.io.IOException{ //ObjectOutputStream会优先调用对象自己实现的writeObject方法
         // Write out element count, and any hidden stuff
         int expectedModCount = modCount;
         s.defaultWriteObject();
@@ -738,7 +737,7 @@ public class ArrayList<E> extends AbstractList<E>
         s.writeInt(size);
 
         // Write out all elements in the proper order.
-        for (int i=0; i<size; i++) {
+        for (int i=0; i<size; i++) { //补上elementData，自己实现序列化策略
             s.writeObject(elementData[i]);
         }
 

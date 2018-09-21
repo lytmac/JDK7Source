@@ -345,9 +345,9 @@ public abstract class Buffer {
      *
      * @return  This buffer
      */
-    public final Buffer flip() {
+    public final Buffer flip() { //主要完成了读写模式的切换，包括读写位置的切换，读写区间的切换
         limit = position;
-        position = 0;
+        position = 0;  //为什么position一定是0呢？
         mark = -1;
         return this;
     }

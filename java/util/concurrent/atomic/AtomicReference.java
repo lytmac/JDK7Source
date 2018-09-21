@@ -57,7 +57,7 @@ public class AtomicReference<V>  implements java.io.Serializable {
       } catch (Exception ex) { throw new Error(ex); }
     }
 
-    private volatile V value;
+    private volatile V value; //这里是volatile的，保证可以看到最新的值
 
     /**
      * Creates a new AtomicReference with the given initial value.

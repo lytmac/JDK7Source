@@ -90,13 +90,13 @@ public class FutureTask<V> implements RunnableFuture<V> {
      * NEW -> INTERRUPTING -> INTERRUPTED
      */
     private volatile int state;
-    private static final int NEW          = 0;
-    private static final int COMPLETING   = 1;
-    private static final int NORMAL       = 2;
-    private static final int EXCEPTIONAL  = 3;
-    private static final int CANCELLED    = 4;
-    private static final int INTERRUPTING = 5;
-    private static final int INTERRUPTED  = 6;
+    private static final int NEW          = 0;  //任务未执行
+    private static final int COMPLETING   = 1;  //任务已完成
+    private static final int NORMAL       = 2;  //任务状态正常
+    private static final int EXCEPTIONAL  = 3;  //任务抛出异常
+    private static final int CANCELLED    = 4;  //任务被取消
+    private static final int INTERRUPTING = 5;  //任务被中断
+    private static final int INTERRUPTED  = 6;  //任务已中断
 
     /** The underlying callable; nulled out after running */
     private Callable<V> callable;
@@ -161,19 +161,35 @@ public class FutureTask<V> implements RunnableFuture<V> {
         return state != NEW;
     }
 
+    /**
+     * 取消任务，若取消任务成功则返回true，否则返回false。
+     * @param mayInterruptIfRunning 表示是否允许取消正在执行却没有执行完毕的任务。
+     * @return 是否取消任务成功
+     * 1 - 任务完成执行，无论mayInterruptIfRunning为true还是false，肯定返回false
+     * 2 - 任务还未执行，无论mayInterruptIfRunning为true还是false，肯定返回true
+     * 3 - 任务正在执行，若mayInterruptIfRunning设置为true，则返回true，若mayInterruptIfRunning设置为false，则返回false。
+     *
+     * 任何状态的变更都需要采用CAS. 别的线程
+     */
     public boolean cancel(boolean mayInterruptIfRunning) {
-        if (state != NEW)
+        if (state != NEW) //只有刚创建的任务可以响应取消操作
             return false;
-        if (mayInterruptIfRunning) {
-            if (!UNSAFE.compareAndSwapInt(this, stateOffset, NEW, INTERRUPTING))
+        if (mayInterruptIfRunning) { //允许取消正在执行却还没有执行完毕的任务
+            if (!UNSAFE.compareAndSwapInt(this, stateOffset, NEW, INTERRUPTING)) {
+                //将任务状态改为中断中，修改成功后调用interrupt方法中断当前线程。
+
                 return false;
+            }
+
+            //如果运行该FutureTask的线程不为空，给该线程中断标志位置位
             Thread t = runner;
             if (t != null)
                 t.interrupt();
             UNSAFE.putOrderedInt(this, stateOffset, INTERRUPTED); // final state
-        }
-        else if (!UNSAFE.compareAndSwapInt(this, stateOffset, NEW, CANCELLED))
+        } else if (!UNSAFE.compareAndSwapInt(this, stateOffset, NEW, CANCELLED)) { //不允许取消正在执行却还没有执行完毕的任务
+            //状态必须是从 NEW -> CANCELLED CAS操作才能成功。所以只有还未执行的任务才可能返回true
             return false;
+        }
         finishCompletion();
         return true;
     }
@@ -249,17 +265,17 @@ public class FutureTask<V> implements RunnableFuture<V> {
     }
 
     public void run() {
-        if (state != NEW ||
-            !UNSAFE.compareAndSwapObject(this, runnerOffset,
-                                         null, Thread.currentThread()))
+        if (state != NEW || !UNSAFE.compareAndSwapObject(this, runnerOffset, null, Thread.currentThread())) {
             return;
+        }
+
         try {
             Callable<V> c = callable;
             if (c != null && state == NEW) {
                 V result;
                 boolean ran;
                 try {
-                    result = c.call();
+                    result = c.call(); //调用call() 执行具体的任务
                     ran = true;
                 } catch (Throwable ex) {
                     result = null;
@@ -354,8 +370,8 @@ public class FutureTask<V> implements RunnableFuture<V> {
     }
 
     /**
-     * Removes and signals all waiting threads, invokes done(), and
-     * nulls out callable.
+     * 从等待队列中移除并唤醒所以等待的线程，调用done()，并将返回null
+     * Removes and signals all waiting threads, invokes done(), and nulls out callable.
      */
     private void finishCompletion() {
         // assert state > COMPLETING;

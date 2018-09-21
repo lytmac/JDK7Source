@@ -1266,8 +1266,9 @@ class Thread implements Runnable {
      *          <i>interrupted status</i> of the current thread is
      *          cleared when this exception is thrown.
      */
-    public final synchronized void join(long millis)
-    throws InterruptedException {
+    public final synchronized void join(long millis) throws InterruptedException {
+        //在join线程终止后，会调用this.notifyAll()唤醒当前线程。这一步是在JVM里实现的，外部应用无需(也不推荐)再调用notifyAll()了。
+
         long base = System.currentTimeMillis();
         long now = 0;
 
@@ -1276,13 +1277,13 @@ class Thread implements Runnable {
         }
 
         if (millis == 0) {
-            while (isAlive()) {
+            while (isAlive()) { //调用线程还存活着，就将当前线程挂起
                 wait(0);
             }
         } else {
             while (isAlive()) {
                 long delay = millis - now;
-                if (delay <= 0) {
+                if (delay <= 0) { //超时跳出循环
                     break;
                 }
                 wait(delay);

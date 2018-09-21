@@ -158,6 +158,7 @@ import java.util.concurrent.atomic.*;
  * @since 1.5
  * @author Doug Lea
  */
+//实现原理：子线程共享的拿同步状态，主线程独占的拿同步状态。只有子线程释放了同步状态后主线程才能拿到同步状态
 public class CountDownLatch {
     /**
      * Synchronization control For CountDownLatch.
@@ -175,15 +176,14 @@ public class CountDownLatch {
         }
 
         protected int tryAcquireShared(int acquires) {
-            return (getState() == 0) ? 1 : -1;
+            return (getState() == 0) ? 1 : -1; //为什么返回值是1/-1???
         }
 
         protected boolean tryReleaseShared(int releases) {
             // Decrement count; signal when transition to zero
             for (;;) {
                 int c = getState();
-                if (c == 0)
-                    return false;
+                if (c == 0) return false;
                 int nextc = c-1;
                 if (compareAndSetState(c, nextc))
                     return nextc == 0;
@@ -277,8 +277,7 @@ public class CountDownLatch {
      * @throws InterruptedException if the current thread is interrupted
      *         while waiting
      */
-    public boolean await(long timeout, TimeUnit unit)
-        throws InterruptedException {
+    public boolean await(long timeout, TimeUnit unit) throws InterruptedException {
         return sync.tryAcquireSharedNanos(1, unit.toNanos(timeout));
     }
 
@@ -292,7 +291,7 @@ public class CountDownLatch {
      *
      * <p>If the current count equals zero then nothing happens.
      */
-    public void countDown() {
+    public void countDown() { //当一个线程结束后，释放一个同步状态
         sync.releaseShared(1);
     }
 
