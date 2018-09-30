@@ -647,7 +647,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
             Thread t;
             if (getState() >= 0 && (t = thread) != null && !t.isInterrupted()) {
                 try {
-                    t.interrupt();
+                    t.interrupt(); //线程池主线程中断worker线程，worker线程该如何响应中断呢？
                 } catch (SecurityException ignore) {
                 }
             }
@@ -1389,7 +1389,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         try {
             checkShutdownAccess();
             advanceRunState(SHUTDOWN);
-            interruptIdleWorkers();
+            interruptIdleWorkers();  //中断空闲的worker
             onShutdown(); // hook for ScheduledThreadPoolExecutor
         } finally {
             mainLock.unlock();
@@ -1421,7 +1421,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         try {
             checkShutdownAccess();
             advanceRunState(STOP);
-            interruptWorkers();
+            interruptWorkers();  //中断所有worker
             tasks = drainQueue();
         } finally {
             mainLock.unlock();

@@ -75,8 +75,7 @@ import sun.misc.Unsafe;
  * @author Doug Lea
  * @param <E> the type of elements held in this collection
  */
-public class CopyOnWriteArrayList<E>
-    implements List<E>, RandomAccess, Cloneable, java.io.Serializable {
+public class CopyOnWriteArrayList<E> implements List<E>, RandomAccess, Cloneable, java.io.Serializable {
     private static final long serialVersionUID = 8673264195747942595L;
 
     /** The lock protecting all mutators */
@@ -385,12 +384,12 @@ public class CopyOnWriteArrayList<E>
      */
     public E set(int index, E element) {
         final ReentrantLock lock = this.lock;
-        lock.lock();
+        lock.lock(); //多个同时执行写操作需要抢锁
         try {
             Object[] elements = getArray();
             E oldValue = get(elements, index);
 
-            if (oldValue != element) {
+            if (oldValue != element) { //先取旧值进行比较。新值与旧值不相等才会触发数组的复制
                 int len = elements.length;
                 Object[] newElements = Arrays.copyOf(elements, len);
                 newElements[index] = element;
