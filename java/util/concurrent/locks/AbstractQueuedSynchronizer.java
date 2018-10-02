@@ -1353,8 +1353,7 @@ public abstract class AbstractQueuedSynchronizer
             throws InterruptedException {
             if (Thread.interrupted())
                 throw new InterruptedException();
-            return tryAcquireShared(arg) >= 0 ||
-                    doAcquireSharedNanos(arg, nanosTimeout);
+            return tryAcquireShared(arg) >= 0 || doAcquireSharedNanos(arg, nanosTimeout);
         }
 
         /**

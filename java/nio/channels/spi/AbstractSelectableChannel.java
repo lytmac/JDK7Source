@@ -185,8 +185,7 @@ public abstract class AbstractSelectableChannel
      *
      * @throws  IllegalArgumentException {@inheritDoc}
      */
-    public final SelectionKey register(Selector sel, int ops,
-                                       Object att)
+    public final SelectionKey register(Selector sel, int ops, Object att)
         throws ClosedChannelException
     {
         synchronized (regLock) {

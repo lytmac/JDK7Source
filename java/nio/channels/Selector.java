@@ -326,7 +326,7 @@ public abstract class Selector implements Closeable {
      * @throws  IllegalArgumentException
      *          If the value of the timeout argument is negative
      */
-    public abstract int select(long timeout)
+    public abstract int select(long timeout) //返回的是准备就绪的键的数量
         throws IOException;
 
     /**

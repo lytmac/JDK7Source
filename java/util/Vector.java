@@ -76,9 +76,7 @@ package java.util;
  * @see LinkedList
  * @since   JDK1.0
  */
-public class Vector<E>
-    extends AbstractList<E>
-    implements List<E>, RandomAccess, Cloneable, java.io.Serializable
+public class Vector<E> extends AbstractList<E> implements List<E>, RandomAccess, Cloneable, java.io.Serializable
 {
     /**
      * The array buffer into which the components of the vector are

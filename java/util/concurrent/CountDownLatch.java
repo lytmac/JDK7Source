@@ -34,6 +34,7 @@
  */
 
 package java.util.concurrent;
+
 import java.util.concurrent.locks.*;
 import java.util.concurrent.atomic.*;
 
@@ -158,7 +159,7 @@ import java.util.concurrent.atomic.*;
  * @since 1.5
  * @author Doug Lea
  */
-//实现原理：子线程共享的拿同步状态，主线程独占的拿同步状态。只有子线程释放了同步状态后主线程才能拿到同步状态
+//实现原理：子线程执行完之后AQS的state--，直到所有的子线程全部完成，也就是state==0时，主线程获取state成功，继续执行。
 public class CountDownLatch {
     /**
      * Synchronization control For CountDownLatch.
@@ -176,17 +177,17 @@ public class CountDownLatch {
         }
 
         protected int tryAcquireShared(int acquires) {
-            return (getState() == 0) ? 1 : -1; //为什么返回值是1/-1???
+            return (getState() == 0) ? 1 : -1;
         }
 
         protected boolean tryReleaseShared(int releases) {
             // Decrement count; signal when transition to zero
-            for (;;) {
+            for (; ; ) {
                 int c = getState();
                 if (c == 0) return false;
-                int nextc = c-1;
+                int nextc = c - 1;
                 if (compareAndSetState(c, nextc))
-                    return nextc == 0;
+                    return nextc == 0; //nextc == 0即为全部释放，nextc > 0表明还未全部释放。
             }
         }
     }
@@ -233,6 +234,11 @@ public class CountDownLatch {
      *         while waiting
      */
     public void await() throws InterruptedException {
+        /**
+         * 1. 如果有其他线程中断了该线程，会抛出异常。交由上层业务代码决定后续如何操作。
+         * 2. state无法获取时会进入一个无限循环，反复尝试获取获取state
+         * 3. 这里依然是进入AQS队列，并一直处于队首位置，且前一个节点不是SIGNAL状态，所以不会将自己挂起
+         */
         sync.acquireSharedInterruptibly(1);
     }
 
