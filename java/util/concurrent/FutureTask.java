@@ -83,7 +83,7 @@ public class FutureTask<V> implements RunnableFuture<V> {
      * states use cheaper ordered/lazy writes because values are unique
      * and cannot be further modified.
      *
-     * Possible state transitions:
+     * Possible state transitions: 可能出现的几种状态装换路线
      * 执行过程正常完成: NEW -> COMPLETING -> NORMAL
      * 执行过程出现异常: NEW -> COMPLETING -> EXCEPTIONAL
      * 执行过程中被取消: NEW -> CANCELLED
@@ -118,8 +118,9 @@ public class FutureTask<V> implements RunnableFuture<V> {
         Object x = outcome;
         if (s == NORMAL)
             return (V)x;
-        if (s >= CANCELLED)
-            throw new CancellationException();
+        if (s >= CANCELLED) throw new CancellationException();
+
+        //走到这里即表示获取数据异常或者再严重点产生Error，这里统一抛出一个ExecutionException
         throw new ExecutionException((Throwable)x);
     }
 
@@ -178,7 +179,6 @@ public class FutureTask<V> implements RunnableFuture<V> {
         if (mayInterruptIfRunning) {
             if (!UNSAFE.compareAndSwapInt(this, stateOffset, NEW, INTERRUPTING)) {
                 //将任务状态改为中断中，修改成功后调用interrupt方法中断当前线程。
-
                 return false;
             }
 
