@@ -1,35 +1,7 @@
 /*
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
-/*
- *
- *
- *
- *
- *
- * Written by Doug Lea with assistance from members of JCP JSR-166
- * Expert Group and released to the public domain, as explained at
+ * Written by Doug Lea with assistance from members of JCP JSR-166 Expert Group and released to the public domain, as explained at
  * http://creativecommons.org/publicdomain/zero/1.0/
  */
 
@@ -40,100 +12,76 @@ import java.security.PrivilegedAction;
 import java.security.PrivilegedExceptionAction;
 
 /**
- * An {@link Executor} that provides methods to manage termination and
- * methods that can produce a {@link Future} for tracking progress of
- * one or more asynchronous tasks.
+ * An Executor that provides methods to manage termination and methods that can produce a Future for tracking progress of one or more asynchronous tasks.
  *
- * <p> An <tt>ExecutorService</tt> can be shut down, which will cause
- * it to reject new tasks.  Two different methods are provided for
- * shutting down an <tt>ExecutorService</tt>. The {@link #shutdown}
- * method will allow previously submitted tasks to execute before
- * terminating, while the {@link #shutdownNow} method prevents waiting
- * tasks from starting and attempts to stop currently executing tasks.
- * Upon termination, an executor has no tasks actively executing, no
- * tasks awaiting execution, and no new tasks can be submitted.  An
- * unused <tt>ExecutorService</tt> should be shut down to allow
- * reclamation of its resources.
+ * 关闭线程池，要考虑拒绝新任务，同时也要考虑如何处理已经提交的任务（还在等待队列里的任务和已经正在执行的任务）
+ * shutdown() 会在停止前继续执行已经提交的任务；shutdownNow() 则会阻止执行等待队列里的任务，对于已经提交的任务也会尝试阻止（应该是发出中断请求），但是无法保证任务会马上终止。
+ * An ExecutorService can be shut down, which will cause it to reject new tasks. Two different methods are provided for shutting down an ExecutorService.
+ * The shutdown method will allow previously submitted tasks to execute before terminating,
+ * while the shutdownNow method prevents waiting tasks from starting and attempts to stop currently executing tasks.
  *
- * <p> Method <tt>submit</tt> extends base method {@link
- * Executor#execute} by creating and returning a {@link Future} that
- * can be used to cancel execution and/or wait for completion.
- * Methods <tt>invokeAny</tt> and <tt>invokeAll</tt> perform the most
- * commonly useful forms of bulk execution, executing a collection of
- * tasks and then waiting for at least one, or all, to
- * complete. (Class {@link ExecutorCompletionService} can be used to
- * write customized variants of these methods.)
+ * Upon termination, an executor has no tasks actively executing, no tasks awaiting execution, and no new tasks can be submitted.
+ * An unused ExecutorService should be shut down to allow reclamation of its resources.
  *
- * <p>The {@link Executors} class provides factory methods for the
- * executor services provided in this package.
+ * Method submit extends base method Executor.execute by creating and returning a Future that can be used to cancel execution and/or wait for completion.
+ * 批量执行方法：invokeAny() 执行一个任务即可返回，其他任务取消；invokeAll() 则必须执行全部任务才能返回
+ * Methods invokeAny and invokeAll perform the most commonly useful forms of bulk execution, executing a collection of tasks and then waiting for at least one, or all, to complete.
  *
- * <h3>Usage Examples</h3>
+ * Class ExecutorCompletionService can be used to write customized variants of these methods.
  *
- * Here is a sketch of a network service in which threads in a thread
- * pool service incoming requests. It uses the preconfigured {@link
- * Executors#newFixedThreadPool} factory method:
+ * The Executors class provides factory methods for the executor services provided in this package.
  *
- * <pre>
- * class NetworkService implements Runnable {
- *   private final ServerSocket serverSocket;
- *   private final ExecutorService pool;
+ * Usage Examples
  *
- *   public NetworkService(int port, int poolSize)
- *       throws IOException {
- *     serverSocket = new ServerSocket(port);
- *     pool = Executors.newFixedThreadPool(poolSize);
- *   }
+ * Here is a sketch of a network service in which threads in a thread pool service incoming requests. It uses the preconfigured Executors.newFixedThreadPool factory method:
  *
- *   public void run() { // run the service
- *     try {
- *       for (;;) {
- *         pool.execute(new Handler(serverSocket.accept()));
- *       }
- *     } catch (IOException ex) {
- *       pool.shutdown();
- *     }
- *   }
- * }
+     * class NetworkService implements Runnable {
+     *      private final ServerSocket serverSocket;
+     *      private final ExecutorService pool;
+     *
+     *      public NetworkService(int port, int poolSize) throws IOException {
+     *          serverSocket = new ServerSocket(port);
+     *          pool = Executors.newFixedThreadPool(poolSize);
+     *      }
+     *
+     *      public void run() { // run the service
+     *          try {
+     *              for (;;) { pool.execute(new Handler(serverSocket.accept())); }
+     *          } catch (IOException ex) {
+     *              pool.shutdown();
+     *          }
+     *      }
+     * }
+     *
+     * class Handler implements Runnable {
+     *      private final Socket socket;
+     *      Handler(Socket socket) { this.socket = socket; }
+     *
+     *      public void run() {
+     *          // read and service request on socket
+     *      }
+     * }
  *
- * class Handler implements Runnable {
- *   private final Socket socket;
- *   Handler(Socket socket) { this.socket = socket; }
- *   public void run() {
- *     // read and service request on socket
- *   }
- * }
- * </pre>
+ * The following method shuts down an ExecutorService in two phases:
+ * first by calling shutdown to reject incoming tasks, and then calling shutdownNow, if necessary, to cancel any lingering tasks.
  *
- * The following method shuts down an <tt>ExecutorService</tt> in two phases,
- * first by calling <tt>shutdown</tt> to reject incoming tasks, and then
- * calling <tt>shutdownNow</tt>, if necessary, to cancel any lingering tasks:
+     * void shutdownAndAwaitTermination(ExecutorService pool) {
+     *      pool.shutdown(); // 首先阻止新任务提交
+     *      try {
+     *          if (!pool.awaitTermination(60, TimeUnit.SECONDS)) { // 为还存在的任务等待60s,如果等待超时则取消已提交的任务
+     *              pool.shutdownNow();
+     *
+     *              if (!pool.awaitTermination(60, TimeUnit.SECONDS)) // 继续等待60s,如果依然等待超时则表明还有任务在运行，线程池依然没有关闭
+     *                  System.err.println("Pool did not terminate");
+     *          }
+     *      } catch (InterruptedException ie) {
+     *          pool.shutdownNow(); // Re-Cancel if current thread also interrupted
+     *          Thread.currentThread().interrupt();
+     *      }
+     * }
  *
- * <pre>
- * void shutdownAndAwaitTermination(ExecutorService pool) {
- *   pool.shutdown(); // Disable new tasks from being submitted
- *   try {
- *     // Wait a while for existing tasks to terminate
- *     if (!pool.awaitTermination(60, TimeUnit.SECONDS)) {
- *       pool.shutdownNow(); // Cancel currently executing tasks
- *       // Wait a while for tasks to respond to being cancelled
- *       if (!pool.awaitTermination(60, TimeUnit.SECONDS))
- *           System.err.println("Pool did not terminate");
- *     }
- *   } catch (InterruptedException ie) {
- *     // (Re-)Cancel if current thread also interrupted
- *     pool.shutdownNow();
- *     // Preserve interrupt status
- *     Thread.currentThread().interrupt();
- *   }
- * }
- * </pre>
- *
- * <p>Memory consistency effects: Actions in a thread prior to the
- * submission of a {@code Runnable} or {@code Callable} task to an
- * {@code ExecutorService}
- * <a href="package-summary.html#MemoryVisibility"><i>happen-before</i></a>
- * any actions taken by that task, which in turn <i>happen-before</i> the
- * result is retrieved via {@code Future.get()}.
+ * Memory consistency effects: Actions in a thread prior to the submission of a Runnable or Callable task to an ExecutorService happen-before any actions taken by that task,
+ * which in turn happen-before the result is retrieved via Future.get().
  *
  * @since 1.5
  * @author Doug Lea
@@ -141,69 +89,50 @@ import java.security.PrivilegedExceptionAction;
 public interface ExecutorService extends Executor {
 
     /**
-     * Initiates an orderly shutdown in which previously submitted
-     * tasks are executed, but no new tasks will be accepted.
+     * Initiates an orderly shutdown in which previously submitted tasks are executed, but no new tasks will be accepted.
      * Invocation has no additional effect if already shut down.
      *
-     * <p>This method does not wait for previously submitted tasks to
-     * complete execution.  Use {@link #awaitTermination awaitTermination}
-     * to do that.
+     * This method does not wait for previously submitted tasks to complete execution.  Use awaitTermination method to do that.
      *
-     * @throws SecurityException if a security manager exists and
-     *         shutting down this ExecutorService may manipulate
-     *         threads that the caller is not permitted to modify
-     *         because it does not hold {@link
-     *         java.lang.RuntimePermission}<tt>("modifyThread")</tt>,
-     *         or the security manager's <tt>checkAccess</tt> method
-     *         denies access.
+     * @throws SecurityException if a security manager exists and shutting down this ExecutorService may manipulate
+     *         threads that the caller is not permitted to modify because it does not hold java.lang.RuntimePermission,
+     *         or the security manager's checkAccess method denies access.
      */
     void shutdown();
 
     /**
-     * Attempts to stop all actively executing tasks, halts the
-     * processing of waiting tasks, and returns a list of the tasks
-     * that were awaiting execution.
+     * Attempts to stop all actively executing tasks, halts the processing of waiting tasks, and returns a list of the tasks that were awaiting execution.
      *
-     * <p>This method does not wait for actively executing tasks to
-     * terminate.  Use {@link #awaitTermination awaitTermination} to
-     * do that.
+     * This method does not wait for actively executing tasks to terminate.  Use awaitTermination method to do that.
      *
-     * <p>There are no guarantees beyond best-effort attempts to stop
-     * processing actively executing tasks.  For example, typical
-     * implementations will cancel via {@link Thread#interrupt}, so any
-     * task that fails to respond to interrupts may never terminate.
+     * 无法保证一定终止正在执行的任务，只能尽全力去做。取消正在执行的任务的典型的实现方式就是采用中断
+     * There are no guarantees beyond best-effort attempts to stop processing actively executing tasks. For example,
+     * typical implementations will cancel via Thread.interrupt, so any task that fails to respond to interrupts may never terminate.
      *
      * @return list of tasks that never commenced execution
-     * @throws SecurityException if a security manager exists and
-     *         shutting down this ExecutorService may manipulate
-     *         threads that the caller is not permitted to modify
-     *         because it does not hold {@link
-     *         java.lang.RuntimePermission}<tt>("modifyThread")</tt>,
-     *         or the security manager's <tt>checkAccess</tt> method
-     *         denies access.
+     * @throws SecurityException if a security manager exists and shutting down this ExecutorService may manipulate
+     *         threads that the caller is not permitted to modify because it does not hold java.lang.RuntimePermission,
+     *         or the security manager's checkAccess method enies access.
      */
     List<Runnable> shutdownNow();
 
     /**
-     * Returns <tt>true</tt> if this executor has been shut down.
      *
-     * @return <tt>true</tt> if this executor has been shut down
+     * @return true if this executor has been shut down
      */
     boolean isShutdown();
 
     /**
-     * Returns <tt>true</tt> if all tasks have completed following shut down.
-     * Note that <tt>isTerminated</tt> is never <tt>true</tt> unless
-     * either <tt>shutdown</tt> or <tt>shutdownNow</tt> was called first.
+     * 如果都没有调用 shutdown() 或者 shutdownNow() 关闭服务，isTerminated() 只会返回false。 只有在服务关闭的前提下，我们才会去讨论终止的问题
+     * Note that isTerminated method never return true unless either shutdown or shutdownNow was called first.
      *
-     * @return <tt>true</tt> if all tasks have completed following shut down
+     * @return true if all tasks have completed following shut down
      */
     boolean isTerminated();
 
     /**
-     * Blocks until all tasks have completed execution after a shutdown
-     * request, or the timeout occurs, or the current thread is
-     * interrupted, whichever happens first.
+     * 调用 shutdown() 后继续调用awaitTermination()，该方法会一直阻塞直到超时或者所有已提交的任务都执行完成（也就是不再有需要执行的任务）。
+     * Blocks until all tasks have completed execution after a shutdown request, or the timeout occurs, or the current thread is interrupted, whichever happens first.
      *
      * @param timeout the maximum time to wait
      * @param unit the time unit of the timeout argument
@@ -211,8 +140,7 @@ public interface ExecutorService extends Executor {
      *         <tt>false</tt> if the timeout elapsed before termination
      * @throws InterruptedException if interrupted while waiting
      */
-    boolean awaitTermination(long timeout, TimeUnit unit)
-        throws InterruptedException;
+    boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException;
 
 
     /**
