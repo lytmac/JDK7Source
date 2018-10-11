@@ -458,6 +458,7 @@ public class Executors {
     // Non-public classes supporting the public methods
 
     /**
+     * 如名字定义的那样，是将 Runnable 对象转为 Callable 对象的一个适配器。call() 与 run() 的最大的区别就是有无返回值。那么就在 run() 执行完后返回一个给定的值
      * A callable that runs given task and returns given result
      */
     static final class RunnableAdapter<T> implements Callable<T> {
@@ -469,6 +470,7 @@ public class Executors {
         }
         public T call() {
             task.run();
+            //在执行完 Runnable.run() 后返回预先给定的返回值。
             return result;
         }
     }

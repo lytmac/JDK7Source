@@ -194,7 +194,7 @@ public class Throwable implements Serializable {
      * @serial
      * @since 1.4
      */
-    private Throwable cause = this;
+    private Throwable cause = this; //原始异常，在重新抛出异常时可以调用initCause()或者带cause的构造函数记录原始异常。
 
     /**
      * The stack trace, as returned by {@link #getStackTrace()}.

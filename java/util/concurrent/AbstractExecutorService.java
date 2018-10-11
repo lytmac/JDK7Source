@@ -37,33 +37,28 @@ package java.util.concurrent;
 import java.util.*;
 
 /**
- * Provides default implementations of {@link ExecutorService}
- * execution methods. This class implements the <tt>submit</tt>,
- * <tt>invokeAny</tt> and <tt>invokeAll</tt> methods using a
- * {@link RunnableFuture} returned by <tt>newTaskFor</tt>, which defaults
- * to the {@link FutureTask} class provided in this package.  For example,
- * the implementation of <tt>submit(Runnable)</tt> creates an
- * associated <tt>RunnableFuture</tt> that is executed and
- * returned. Subclasses may override the <tt>newTaskFor</tt> methods
- * to return <tt>RunnableFuture</tt> implementations other than
- * <tt>FutureTask</tt>.
+ * Provides default implementations of ExecutorService execution methods.
+ * This class implements the submit, invokeAny and invokeAll methods using a RunnableFuture returned by newTaskFor,
+ * which defaults to the FutureTask class provided in this package. For example, the implementation of submit(Runnable)
+ * creates an associated RunnableFuture that is executed and returned.
  *
- * <p> <b>Extension example</b>. Here is a sketch of a class
- * that customizes {@link ThreadPoolExecutor} to use
- * a <tt>CustomTask</tt> class instead of the default <tt>FutureTask</tt>:
- *  <pre> {@code
- * public class CustomThreadPoolExecutor extends ThreadPoolExecutor {
+ * Subclasses may override the newTaskFor methods to return RunnableFuture implementations other than FutureTask.
  *
- *   static class CustomTask<V> implements RunnableFuture<V> {...}
+ * Extension example. Here is a sketch of a class that customizes ThreadPoolExecutor to use a CustomTask class instead of the default FutureTask:
  *
- *   protected <V> RunnableFuture<V> newTaskFor(Callable<V> c) {
- *       return new CustomTask<V>(c);
- *   }
- *   protected <V> RunnableFuture<V> newTaskFor(Runnable r, V v) {
- *       return new CustomTask<V>(r, v);
- *   }
- *   // ... add constructors, etc.
- * }}</pre>
+     * public class CustomThreadPoolExecutor extends ThreadPoolExecutor {
+     *
+     *      static class CustomTask<V> implements RunnableFuture<V> {...}
+     *
+     *      protected <V> RunnableFuture<V> newTaskFor(Callable<V> c) {
+     *          return new CustomTask<V>(c);
+     *      }
+     *
+     *      protected <V> RunnableFuture<V> newTaskFor(Runnable r, V v) {
+     *          return new CustomTask<V>(r, v);
+     *      }
+     *   // ... add constructors, etc.
+     * }
  *
  * @since 1.5
  * @author Doug Lea
@@ -71,15 +66,12 @@ import java.util.*;
 public abstract class AbstractExecutorService implements ExecutorService {
 
     /**
-     * Returns a <tt>RunnableFuture</tt> for the given runnable and default
-     * value.
+     * Returns a RunnableFuture for the given runnable and default value.
      *
      * @param runnable the runnable task being wrapped
      * @param value the default value for the returned future
-     * @return a <tt>RunnableFuture</tt> which when run will run the
-     * underlying runnable and which, as a <tt>Future</tt>, will yield
-     * the given value as its result and provide for cancellation of
-     * the underlying task.
+     * @return a RunnableFuture which when run will run the underlying runnable and which, as a Future, will yield
+     *         the given value as its result and provide for cancellation of the underlying task.
      * @since 1.6
      */
     protected <T> RunnableFuture<T> newTaskFor(Runnable runnable, T value) {
@@ -87,13 +79,11 @@ public abstract class AbstractExecutorService implements ExecutorService {
     }
 
     /**
-     * Returns a <tt>RunnableFuture</tt> for the given callable task.
+     * Returns a RunnableFuture for the given callable task.
      *
      * @param callable the callable task being wrapped
-     * @return a <tt>RunnableFuture</tt> which when run will call the
-     * underlying callable and which, as a <tt>Future</tt>, will yield
-     * the callable's result as its result and provide for
-     * cancellation of the underlying task.
+     * @return a RunnableFuture which when run will call the underlying callable and which, as a Future, will yield
+     *         the callable's result as its result and provide for cancellation of the underlying task.
      * @since 1.6
      */
     protected <T> RunnableFuture<T> newTaskFor(Callable<T> callable) {
@@ -101,8 +91,9 @@ public abstract class AbstractExecutorService implements ExecutorService {
     }
 
     /**
-     * @throws RejectedExecutionException {@inheritDoc}
-     * @throws NullPointerException       {@inheritDoc}
+     * Future<?> 即可视为不关心返回值
+     * @throws RejectedExecutionException
+     * @throws NullPointerException
      */
     public Future<?> submit(Runnable task) {
         if (task == null) throw new NullPointerException();
@@ -112,22 +103,26 @@ public abstract class AbstractExecutorService implements ExecutorService {
     }
 
     /**
-     * @throws RejectedExecutionException {@inheritDoc}
-     * @throws NullPointerException       {@inheritDoc}
+     * @throws RejectedExecutionException
+     * @throws NullPointerException
      */
     public <T> Future<T> submit(Runnable task, T result) {
-        if (task == null) throw new NullPointerException();
+        if (task == null)
+            throw new NullPointerException();
+
         RunnableFuture<T> ftask = newTaskFor(task, result);
         execute(ftask);
         return ftask;
     }
 
     /**
-     * @throws RejectedExecutionException {@inheritDoc}
-     * @throws NullPointerException       {@inheritDoc}
+     * @throws RejectedExecutionException
+     * @throws NullPointerException
      */
     public <T> Future<T> submit(Callable<T> task) {
-        if (task == null) throw new NullPointerException();
+        if (task == null)
+            throw new NullPointerException();
+
         RunnableFuture<T> ftask = newTaskFor(task);
         execute(ftask);
         return ftask;
@@ -136,32 +131,27 @@ public abstract class AbstractExecutorService implements ExecutorService {
     /**
      * the main mechanics of invokeAny.
      */
-    private <T> T doInvokeAny(Collection<? extends Callable<T>> tasks,
-                            boolean timed, long nanos)
-        throws InterruptedException, ExecutionException, TimeoutException {
+    private <T> T doInvokeAny(Collection<? extends Callable<T>> tasks, boolean timed, long nanos) throws InterruptedException, ExecutionException, TimeoutException {
         if (tasks == null)
             throw new NullPointerException();
         int ntasks = tasks.size();
         if (ntasks == 0)
             throw new IllegalArgumentException();
         List<Future<T>> futures= new ArrayList<Future<T>>(ntasks);
-        ExecutorCompletionService<T> ecs =
-            new ExecutorCompletionService<T>(this);
+        ExecutorCompletionService<T> ecs = new ExecutorCompletionService<T>(this);
 
-        // For efficiency, especially in executors with limited
-        // parallelism, check to see if previously submitted tasks are
-        // done before submitting more of them. This interleaving
-        // plus the exception mechanics account for messiness of main
-        // loop.
+        /**
+         * For efficiency, especially in executors with limited parallelism, check to see if previously submitted tasks are
+         * done before submitting more of them. This interleaving plus the exception mechanics account for messiness of main loop.
+         */
 
         try {
-            // Record exceptions so that if we fail to obtain any
-            // result, we can throw the last exception we got.
+            // Record exceptions so that if we fail to obtain any result, we can throw the last exception we got.
             ExecutionException ee = null;
             long lastTime = timed ? System.nanoTime() : 0;
             Iterator<? extends Callable<T>> it = tasks.iterator();
 
-            // Start one task for sure; the rest incrementally
+            // Start one task for sure; the rest incrementally. 确保至少有一个任务开始执行
             futures.add(ecs.submit(it.next()));
             --ntasks;
             int active = 1;
