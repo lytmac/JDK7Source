@@ -1,35 +1,7 @@
 /*
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
-/*
- *
- *
- *
- *
- *
- * Written by Doug Lea with assistance from members of JCP JSR-166
- * Expert Group and released to the public domain, as explained at
+ * Written by Doug Lea with assistance from members of JCP JSR-166 Expert Group and released to the public domain, as explained at
  * http://creativecommons.org/publicdomain/zero/1.0/
  */
 
@@ -38,28 +10,18 @@ import java.util.concurrent.*;
 import java.util.Date;
 
 /**
- * {@code Condition} factors out the {@code Object} monitor
- * methods ({@link Object#wait() wait}, {@link Object#notify notify}
- * and {@link Object#notifyAll notifyAll}) into distinct objects to
- * give the effect of having multiple wait-sets per object, by
- * combining them with the use of arbitrary {@link Lock} implementations.
- * Where a {@code Lock} replaces the use of {@code synchronized} methods
- * and statements, a {@code Condition} replaces the use of the Object
- * monitor methods.
+ * 对象的监视器(monitor) 只维护了一个等待队列，Condition 对象使得我们可以在同一把锁上维护多个等待队列。
+ * Condition factors out the Object monitor methods wait, notify and notifyAll into distinct objects to give the effect of having multiple wait-sets per object,
+ * by combining them with the use of arbitrary Lock implementations.
+ * Where a Lock replaces the use of synchronized methods and statements, a Condition replaces the use of the Object monitor methods.
  *
- * <p>Conditions (also known as <em>condition queues</em> or
- * <em>condition variables</em>) provide a means for one thread to
- * suspend execution (to &quot;wait&quot;) until notified by another
- * thread that some state condition may now be true.  Because access
- * to this shared state information occurs in different threads, it
- * must be protected, so a lock of some form is associated with the
- * condition. The key property that waiting for a condition provides
- * is that it <em>atomically</em> releases the associated lock and
- * suspends the current thread, just like {@code Object.wait}.
+ * Conditions (also known as condition queues or condition variables) provide a means for one thread to suspend execution (to wait) until notified by another
+ * thread that some state condition may now be true. Because access to this shared state information occurs in different threads, it must be protected, so a
+ * lock of some form is associated with the condition.
  *
- * <p>A {@code Condition} instance is intrinsically bound to a lock.
- * To obtain a {@code Condition} instance for a particular {@link Lock}
- * instance use its {@link Lock#newCondition newCondition()} method.
+ * The key property that waiting for a condition provides is that it atomically releases the associated lock and suspends the current thread, just like Object.wait().
+ *
+ * A Condition instance is intrinsically bound to a lock. To obtain a Condition instance for a particular Lock instance use its Lock.newCondition() method.
  *
  * <p>As an example, suppose we have a bounded buffer which supports
  * {@code put} and {@code take} methods.  If a
