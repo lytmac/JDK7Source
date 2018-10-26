@@ -1952,49 +1952,33 @@ public final
 
 
     /**
-     * Returns a {@code Method} object that reflects the specified
-     * declared method of the class or interface represented by this
-     * {@code Class} object. The {@code name} parameter is a
-     * {@code String} that specifies the simple name of the desired
-     * method, and the {@code parameterTypes} parameter is an array of
-     * {@code Class} objects that identify the method's formal parameter
-     * types, in declared order.  If more than one method with the same
-     * parameter types is declared in a class, and one of these methods has a
-     * return type that is more specific than any of the others, that method is
-     * returned; otherwise one of the methods is chosen arbitrarily.  If the
-     * name is "&lt;init&gt;"or "&lt;clinit&gt;" a {@code NoSuchMethodException}
-     * is raised.
+     * Returns a Method object that reflects the specified declared method of the class or interface represented by this Class object.
+     * The name parameter is a String that specifies the simple name of the desired method, and the parameterTypes parameter is an array of
+     * Class objects that identify the method's formal parameter types, in declared order.
+     * If more than one method with the same parameter types is declared in a class, and one of these methods has a return type that is more
+     * specific than any of the others, that method is returned; otherwise one of the methods is chosen arbitrarily.
+     *
+     * If the name is "init" or "clinit", a NoSuchMethodException is raised.
      *
      * @param name the name of the method
      * @param parameterTypes the parameter array
-     * @return    the {@code Method} object for the method of this class
+     * @return the Method object for the method of this class
      * matching the specified name and parameters
      * @exception NoSuchMethodException if a matching method is not found.
      * @exception NullPointerException if {@code name} is {@code null}
      * @exception  SecurityException
-     *             If a security manager, <i>s</i>, is present and any of the
+     *             If a security manager, s, is present and any of the
      *             following conditions is met:
      *
-     *             <ul>
+     *             invocation of SecurityManager.checkMemberAccess s.checkMemberAccess(this, Member.DECLARED) denies access to the declared method
      *
-     *             <li> invocation of
-     *             {@link SecurityManager#checkMemberAccess
-     *             s.checkMemberAccess(this, Member.DECLARED)} denies
-     *             access to the declared method
-     *
-     *             <li> the caller's class loader is not the same as or an
-     *             ancestor of the class loader for the current class and
-     *             invocation of {@link SecurityManager#checkPackageAccess
-     *             s.checkPackageAccess()} denies access to the package
-     *             of this class
-     *
-     *             </ul>
+     *             the caller's class loader is not the same as or an ancestor of the class loader for the current class and
+     *             invocation of SecurityManager.checkPackageAccess s.checkPackageAccess() denies access to the package of this class
      *
      * @since JDK1.1
      */
     @CallerSensitive
-    public Method getDeclaredMethod(String name, Class<?>... parameterTypes)
-        throws NoSuchMethodException, SecurityException {
+    public Method getDeclaredMethod(String name, Class<?>... parameterTypes) throws NoSuchMethodException, SecurityException {
         // be very careful not to change the stack depth of this
         // checkMemberAccess call for security reasons
         // see java.lang.SecurityManager.checkMemberAccess
@@ -2005,7 +1989,6 @@ public final
         }
         return method;
     }
-
 
     /**
      * Returns a {@code Constructor} object that reflects the specified

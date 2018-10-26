@@ -10,129 +10,106 @@ import java.util.concurrent.*;
 import java.util.Date;
 
 /**
- * 对象的监视器(monitor) 只维护了一个等待队列，Condition 对象使得我们可以在同一把锁上维护多个等待队列。
+ * 对象的监视器(monitor)只维护了一个等待队列，Condition对象使得我们可以在同一把锁上维护多个等待队列。
  * Condition factors out the Object monitor methods wait, notify and notifyAll into distinct objects to give the effect of having multiple wait-sets per object,
  * by combining them with the use of arbitrary Lock implementations.
  * Where a Lock replaces the use of synchronized methods and statements, a Condition replaces the use of the Object monitor methods.
  *
- * Conditions (also known as condition queues or condition variables) provide a means for one thread to suspend execution (to wait) until notified by another
- * thread that some state condition may now be true. Because access to this shared state information occurs in different threads, it must be protected, so a
- * lock of some form is associated with the condition.
+ * Condition对象提供的是在某种条件下将自身的运行线程挂起和在某种条件下唤醒其他线程的方式。其实现形式也是通过队列进行排队。
+ * Conditions (also known as condition queues or condition variables) provide a means for one thread to suspend execution (to wait)
+ * until notified by another thread that some state condition may now be true.
  *
+ * Because access to this shared state information occurs in different threads, it must be protected, so a lock of some form is associated with the condition.
+ *
+ * 在Condition上等待提供了一个很重要的属性是：执行释放关联的锁和将当前线程挂起这两个操作变成了原子操作。
  * The key property that waiting for a condition provides is that it atomically releases the associated lock and suspends the current thread, just like Object.wait().
  *
  * A Condition instance is intrinsically bound to a lock. To obtain a Condition instance for a particular Lock instance use its Lock.newCondition() method.
  *
- * <p>As an example, suppose we have a bounded buffer which supports
- * {@code put} and {@code take} methods.  If a
- * {@code take} is attempted on an empty buffer, then the thread will block
- * until an item becomes available; if a {@code put} is attempted on a
- * full buffer, then the thread will block until a space becomes available.
- * We would like to keep waiting {@code put} threads and {@code take}
- * threads in separate wait-sets so that we can use the optimization of
- * only notifying a single thread at a time when items or spaces become
- * available in the buffer. This can be achieved using two
- * {@link Condition} instances.
- * <pre>
- * class BoundedBuffer {
- *   <b>final Lock lock = new ReentrantLock();</b>
- *   final Condition notFull  = <b>lock.newCondition(); </b>
- *   final Condition notEmpty = <b>lock.newCondition(); </b>
+ * As an example, suppose we have a bounded buffer which supports put and take methods.
+ * If a take is attempted on an empty buffer, then the thread will block until an item becomes available;
+ * if a put is attempted on a full buffer, then the thread will block until a space becomes available.
+ * We would like to keep waiting put} threads and take threads in separate wait-sets so that we can use the optimization of only notifying
+ * a single thread at a time when items or spaces become available in the buffer. This can be achieved using two Condition instances.
  *
- *   final Object[] items = new Object[100];
- *   int putptr, takeptr, count;
+     *  class BoundedBuffer {
+     *      final Lock lock = new ReentrantLock();
+     *      final Condition notFull  = lock.newCondition();
+     *      final Condition notEmpty = lock.newCondition();
+     *
+     *      final Object[] items = new Object[100];
+     *      int putptr, takeptr, count;
+     *
+     *      public void put(Object x) throws InterruptedException {
+     *          lock.lock();
+     *          try {
+     *              while (count == items.length) //队列已满，条件不满足，将当前线程放入notFull条件上的等待队列
+     *                  notFull.await();
+     *              items[putptr] = x;
+     *              if (++putptr == items.length)
+     *                  putptr = 0;
+     *              ++count;
+     *              notEmpty.signal();
+     *          } finally {
+     *              lock.unlock();
+     *          }
+     *      }
+     *
+     *      public Object take() throws InterruptedException {
+     *          lock.lock();
+     *          try {
+     *              while (count == 0) //队列为空，条件不满足，将当前线程放入notEmpty条件上的等待队列
+     *                  notEmpty.await();
+     *              Object x = items[takeptr];
+     *              if (++takeptr == items.length)
+     *                  takeptr = 0;
+     *              --count;
+     *              notFull.signal();
+     *              return x;
+     *          } finally {
+     *              lock.unlock();
+     *          }
+     *      }
+     *  }
  *
- *   public void put(Object x) throws InterruptedException {
- *     <b>lock.lock();
- *     try {</b>
- *       while (count == items.length)
- *         <b>notFull.await();</b>
- *       items[putptr] = x;
- *       if (++putptr == items.length) putptr = 0;
- *       ++count;
- *       <b>notEmpty.signal();</b>
- *     <b>} finally {
- *       lock.unlock();
- *     }</b>
- *   }
+ * (The java.util.concurrent.ArrayBlockingQueue class provides this functionality, so there is no reason to implement this sample usage class.)
  *
- *   public Object take() throws InterruptedException {
- *     <b>lock.lock();
- *     try {</b>
- *       while (count == 0)
- *         <b>notEmpty.await();</b>
- *       Object x = items[takeptr];
- *       if (++takeptr == items.length) takeptr = 0;
- *       --count;
- *       <b>notFull.signal();</b>
- *       return x;
- *     <b>} finally {
- *       lock.unlock();
- *     }</b>
- *   }
- * }
- * </pre>
+ * A Condition implementation can provide behavior and semantics that is different from that of the Object monitor methods,
+ * Condition实现类可以保证通知顺序、在执行通知时不需要持有一个锁。
+ * such as guaranteed ordering for notifications, or not requiring a lock to be held when performing notifications.
+ * If an implementation provides such specialized semantics then the implementation must document those semantics.
  *
- * (The {@link java.util.concurrent.ArrayBlockingQueue} class provides
- * this functionality, so there is no reason to implement this
- * sample usage class.)
+ * Note that Condition instances are just normal objects and can themselves be used as the target in a synchronized statement, and
+ * can have their own monitor wait and notification methods invoked. Acquiring the monitor lock of a Condition instance, or using its monitor
+ * methods, has no specified relationship with acquiring the Lock associated with that Condition or the use of its waitingsignalling methods.
  *
- * <p>A {@code Condition} implementation can provide behavior and semantics
- * that is
- * different from that of the {@code Object} monitor methods, such as
- * guaranteed ordering for notifications, or not requiring a lock to be held
- * when performing notifications.
- * If an implementation provides such specialized semantics then the
- * implementation must document those semantics.
+ * It is recommended that to avoid confusion you never use Condition instances in this way, except perhaps within their own implementation.
  *
- * <p>Note that {@code Condition} instances are just normal objects and can
- * themselves be used as the target in a {@code synchronized} statement,
- * and can have their own monitor {@link Object#wait wait} and
- * {@link Object#notify notification} methods invoked.
- * Acquiring the monitor lock of a {@code Condition} instance, or using its
- * monitor methods, has no specified relationship with acquiring the
- * {@link Lock} associated with that {@code Condition} or the use of its
- * {@linkplain #await waiting} and {@linkplain #signal signalling} methods.
- * It is recommended that to avoid confusion you never use {@code Condition}
- * instances in this way, except perhaps within their own implementation.
+ * Except where noted, passing a null value for any parameter will result in a NullPointerException being thrown.
  *
- * <p>Except where noted, passing a {@code null} value for any parameter
- * will result in a {@link NullPointerException} being thrown.
+ * Implementation Considerations: 实现的注意事项
  *
- * <h3>Implementation Considerations</h3>
+ * When waiting upon a Condition, a spurious wakeup(虚假唤醒) is permitted to occur, in general, as a concession to the underlying platform semantics.
  *
- * <p>When waiting upon a {@code Condition}, a &quot;<em>spurious
- * wakeup</em>&quot; is permitted to occur, in
- * general, as a concession to the underlying platform semantics.
- * This has little practical impact on most application programs as a
- * {@code Condition} should always be waited upon in a loop, testing
- * the state predicate that is being waited for.  An implementation is
- * free to remove the possibility of spurious wakeups but it is
- * recommended that applications programmers always assume that they can
- * occur and so always wait in a loop.
+ * 因为在等待Condition时，"虚假唤醒" 这种情况是可能发生的。因此Condition对象应该在一个循环中被等待，而不是在if判断语句中等待。
+ * This has little practical impact on most application programs as a Condition should always be waited upon in a loop, testing the state predicate
+ * that is being waited for. An implementation is free to remove the possibility of spurious wakeups but it is recommended that applications
+ * programmers always assume that they can occur and so always wait in a loop.
  *
- * <p>The three forms of condition waiting
- * (interruptible, non-interruptible, and timed) may differ in their ease of
- * implementation on some platforms and in their performance characteristics.
- * In particular, it may be difficult to provide these features and maintain
- * specific semantics such as ordering guarantees.
- * Further, the ability to interrupt the actual suspension of the thread may
- * not always be feasible to implement on all platforms.
+ * The three forms of condition waiting (interruptible, non-interruptible, and timed) may differ in their ease of implementation on some platforms and in their
+ * performance characteristics. In particular, it may be difficult to provide these features and maintain specific semantics such as ordering guarantees.
  *
- * <p>Consequently, an implementation is not required to define exactly the
- * same guarantees or semantics for all three forms of waiting, nor is it
- * required to support interruption of the actual suspension of the thread.
+ * 并不是所有平台都提供了中断线程挂起行为的能力
+ * Further, the ability to interrupt the actual suspension of the thread may not always be feasible to implement on all platforms.
  *
- * <p>An implementation is required to
- * clearly document the semantics and guarantees provided by each of the
- * waiting methods, and when an implementation does support interruption of
- * thread suspension then it must obey the interruption semantics as defined
- * in this interface.
+ * Consequently, an implementation is not required to define exactly the same guarantees or semantics for all three forms of waiting,
+ * nor is it required to support interruption of the actual suspension of the thread.
  *
- * <p>As interruption generally implies cancellation, and checks for
- * interruption are often infrequent, an implementation can favor responding
- * to an interrupt over normal method return. This is true even if it can be
- * shown that the interrupt occurred after another action that may have
+ * An implementation is required to clearly document the semantics and guarantees provided by each of the waiting methods, and when an implementation
+ * does support interruption of thread suspension then it must obey the interruption semantics as defined in this interface.
+ *
+ * As interruption generally implies cancellation, and checks for interruption are often infrequent, an implementation can favor responding
+ * to an interrupt over normal method return. This is true even if it can be shown that the interrupt occurred after another action that may have
  * unblocked the thread. An implementation should document this behavior.
  *
  * @since 1.5
@@ -141,26 +118,17 @@ import java.util.Date;
 public interface Condition {
 
     /**
-     * Causes the current thread to wait until it is signalled or
-     * {@linkplain Thread#interrupt interrupted}.
+     * Causes the current thread to wait until it is signalled by other thread or interrupted by Thread.interrupt().
      *
-     * <p>The lock associated with this {@code Condition} is atomically
-     * released and the current thread becomes disabled for thread scheduling
-     * purposes and lies dormant until <em>one</em> of four things happens:
-     * <ul>
-     * <li>Some other thread invokes the {@link #signal} method for this
-     * {@code Condition} and the current thread happens to be chosen as the
-     * thread to be awakened; or
-     * <li>Some other thread invokes the {@link #signalAll} method for this
-     * {@code Condition}; or
-     * <li>Some other thread {@linkplain Thread#interrupt interrupts} the
-     * current thread, and interruption of thread suspension is supported; or
-     * <li>A &quot;<em>spurious wakeup</em>&quot; occurs.
-     * </ul>
+     * The lock associated with this Condition is atomically released and the current thread becomes disabled
+     * for thread scheduling purposes and lies dormant until one of four things happens:
+        * Some other thread invokes the signal method for this Condition} and the current thread happens to be chosen as the thread to be awakened;
+        * Some other thread invokes the signalAll method for this Condition;
+        * Some other thread interrupts the current thread, and interruption of thread suspension is supported; or
+        * A spurious wakeup occurs(虚假唤醒).
      *
-     * <p>In all cases, before this method can return the current thread must
-     * re-acquire the lock associated with this condition. When the
-     * thread returns it is <em>guaranteed</em> to hold this lock.
+     * In all cases, before this method can return the current thread must re-acquire the lock associated with this condition.
+     * When the thread returns it is guaranteed to hold this lock.
      *
      * <p>If the current thread:
      * <ul>
@@ -419,7 +387,7 @@ public interface Condition {
      * is selected for waking up. That thread must then re-acquire the
      * lock before returning from {@code await}.
      *
-     * <p><b>Implementation Considerations</b>
+     * Implementation Considerations
      *
      * <p>An implementation may (and typically does) require that the
      * current thread hold the lock associated with this {@code

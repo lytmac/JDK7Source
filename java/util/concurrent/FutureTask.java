@@ -64,7 +64,7 @@ public class FutureTask<V> implements RunnableFuture<V> {
      */
 
     /**
-     * 只有 set()、setException()、cancel() 三个方法可以改变 state。运行期间的瞬态值可以设为 COMPLETING 或 INTERRUPTING
+     * 只有set()、setException()、cancel()三个方法可以改变state。运行期间的瞬态值可以设为COMPLETING或INTERRUPTING
      * The run state of this task, initially NEW.  The run state transitions to a terminal state only in methods set, setException, and cancel.
      * 
      * 只有在将设置运算结果的那一瞬间，状态才为COMPLETING。
@@ -117,7 +117,7 @@ public class FutureTask<V> implements RunnableFuture<V> {
         if (s == NORMAL) return (V) x;
         if (s >= CANCELLED) throw new CancellationException();
 
-        //在运行过程中抛出异常，run() 会调用 setException() 将异常赋值为 outcome. 对外应统一已抛出异常的形式给出。
+        //在运行过程中抛出异常，run()会调用setException()将异常赋值为outcome. 对外应统一已抛出异常的形式给出。
         throw new ExecutionException((Throwable) x);
     }
 
@@ -182,7 +182,7 @@ public class FutureTask<V> implements RunnableFuture<V> {
             UNSAFE.putOrderedInt(this, stateOffset, INTERRUPTED); // final state
         } else if (!UNSAFE.compareAndSwapInt(this, stateOffset, NEW, CANCELLED)) {
             //不允许取消正在执行却还没有执行完毕的任务
-            //状态必须是从 NEW -> CANCELLED CAS操作才能成功。所以只有还未执行的任务才可能返回true
+            //状态必须是从NEW->CANCELLED,CAS操作才能成功。所以只有还未执行的任务才可能返回true
             return false;
         }
 
@@ -289,7 +289,7 @@ public class FutureTask<V> implements RunnableFuture<V> {
 
     /**
      * Executes the computation without setting its result, and then resets this future to initial state, failing to do so if the computation
-     * encounters an exception or is cancelled.  This is designed for use with tasks that intrinsically execute more than once.
+     * encounters an exception or is cancelled. This is designed for use with tasks that intrinsically execute more than once.
      *
      * @return true if successfully run and reset
      */
@@ -333,11 +333,9 @@ public class FutureTask<V> implements RunnableFuture<V> {
 
         // assert state == INTERRUPTED;
 
-        // We want to clear any interrupt we may have received from
-        // cancel(true).  However, it is permissible to use interrupts
-        // as an independent mechanism for a task to communicate with
-        // its caller, and there is no way to clear only the
-        // cancellation interrupt.
+        // We want to clear any interrupt we may have received from cancel(true).
+        // However, it is permissible to use interrupts as an independent mechanism for a task to communicate with
+        // its caller, and there is no way to clear only the cancellation interrupt.
         //
         // Thread.interrupted();
     }
@@ -399,9 +397,9 @@ public class FutureTask<V> implements RunnableFuture<V> {
             /**
              * 这里依然是经典的唤醒后继续执行的问题！！！
              * 等待队列的线程被唤醒后将继续在这个循环体内执行，具体的位置就是 LockSupport.park()、LockSupport.parkNanos()方法，也就是循环开始的位置。
-             * 唤醒操作只有cancel()、 set()、 setException() 这三个方法会执行。
-             * cancel() 调用成功后，state == CANCELED， get()会检查并抛出异常CancellationException
-             * set()、setException() 则会分别将运算结果和异常赋值给outcome。get()可以通过检查tate 是 NORMAL 还是 EXCEPTIONAL 来区分是否执行完成。
+             * 唤醒操作只有cancel()、set()、setException()这三个方法会执行。
+             * cancel()调用成功后，state == CANCELED，get()会检查并抛出异常CancellationException
+             * set()、setException()则会分别将运算结果和异常赋值给outcome。get()可以通过检查state是NORMAL还是EXCEPTIONAL来区分是否执行完成。
              */
 
             //因为是无限循环，所以每次进来前先校验线程是否被中断。运行这段代码的是调用 get()的等待运行结果的线程。
@@ -439,14 +437,10 @@ public class FutureTask<V> implements RunnableFuture<V> {
     }
 
     /**
-     * Tries to unlink a timed-out or interrupted wait node to avoid
-     * accumulating garbage.  Internal nodes are simply unspliced
-     * without CAS since it is harmless if they are traversed anyway
-     * by releasers.  To avoid effects of unsplicing from already
-     * removed nodes, the list is retraversed in case of an apparent
-     * race.  This is slow when there are a lot of nodes, but we don't
-     * expect lists to be long enough to outweigh higher-overhead
-     * schemes.
+     * Tries to unlink a timed-out or interrupted wait node to avoid accumulating garbage.
+     * Internal nodes are simply unspliced without CAS since it is harmless if they are traversed anyway by releasers.
+     * To avoid effects of unsplicing from already removed nodes, the list is retraversed in case of an apparent race.
+     * This is slow when there are a lot of nodes, but we don't expect lists to be long enough to outweigh higher-overhead schemes.
      */
     private void removeWaiter(WaitNode node) {
         if (node != null) {

@@ -1,33 +1,13 @@
 /*
  * Copyright (c) 1997, 2005, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
  */
 
 package java.lang.ref;
 
 /**
- * Reference queues, to which registered reference objects are appended by the
- * garbage collector after the appropriate reachability changes are detected.
+ * 在检测到可达性更改后，垃圾收集器将附加的注册引用对象附加到该引用队列
+ * Reference queues, to which registered reference objects are appended by the garbage collector after the appropriate reachability changes are detected.
  *
  * @author   Mark Reinhold
  * @since    1.2
@@ -87,12 +67,10 @@ public class ReferenceQueue<T> {
     }
 
     /**
-     * Polls this queue to see if a reference object is available.  If one is
-     * available without further delay then it is removed from the queue and
-     * returned.  Otherwise this method immediately returns <tt>null</tt>.
+     * Polls this queue to see if a reference object is available.
+     * If one is available without further delay then it is removed from the queue and returned. Otherwise this method immediately returns null.
      *
-     * @return  A reference object, if one was immediately available,
-     *          otherwise <code>null</code>
+     * @return  A reference object, if one was immediately available, otherwise null
      */
     public Reference<? extends T> poll() {
         if (head == null)
@@ -103,24 +81,16 @@ public class ReferenceQueue<T> {
     }
 
     /**
-     * Removes the next reference object in this queue, blocking until either
-     * one becomes available or the given timeout period expires.
+     * Removes the next reference object in this queue, blocking until either one becomes available or the given timeout period expires.
+     * This method does not offer real-time guarantees: It schedules the timeout as if by invoking the wait method.
      *
-     * <p> This method does not offer real-time guarantees: It schedules the
-     * timeout as if by invoking the {@link Object#wait(long)} method.
+     * @param  timeout If positive, block for up to timeout milliseconds while waiting for a reference to be added to this queue. If zero, block indefinitely.
      *
-     * @param  timeout  If positive, block for up to <code>timeout</code>
-     *                  milliseconds while waiting for a reference to be
-     *                  added to this queue.  If zero, block indefinitely.
+     * @return  A reference object, if one was available within the specified timeout period, otherwise null
      *
-     * @return  A reference object, if one was available within the specified
-     *          timeout period, otherwise <code>null</code>
+     * @throws  IllegalArgumentException. If the value of the timeout argument is negative
      *
-     * @throws  IllegalArgumentException
-     *          If the value of the timeout argument is negative
-     *
-     * @throws  InterruptedException
-     *          If the timeout wait is interrupted
+     * @throws  InterruptedException. If the timeout wait is interrupted
      */
     public Reference<? extends T> remove(long timeout)
         throws IllegalArgumentException, InterruptedException
@@ -141,11 +111,10 @@ public class ReferenceQueue<T> {
     }
 
     /**
-     * Removes the next reference object in this queue, blocking until one
-     * becomes available.
+     * Removes the next reference object in this queue, blocking until one becomes available.
      *
-     * @return A reference object, blocking until one becomes available
-     * @throws  InterruptedException  If the wait is interrupted
+     * @return  A reference object, blocking until one becomes available
+     * @throws  InterruptedException. If the wait is interrupted
      */
     public Reference<? extends T> remove() throws InterruptedException {
         return remove(0);

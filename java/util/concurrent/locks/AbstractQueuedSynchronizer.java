@@ -1629,24 +1629,22 @@ public abstract class AbstractQueuedSynchronizer extends AbstractOwnableSynchron
         }
 
         /**
-         * Transfers a node from a condition queue onto sync queue.
-         * Returns true if successful.
+         * 将线程节点从condition队列移到sync队列上。从Condition队列中被唤醒，并不意味着马上你能获取执行权，依然要先移动到sync队列中尝试获取锁。
+         * Transfers a node from a condition queue onto sync queue. Returns true if successful.
          * @param node the node
-         * @return true if successfully transferred (else the node was
-         * cancelled before signal).
+         * @return true if successfully transferred (else the node was cancelled before signal).
          */
         final boolean transferForSignal (Node node){ //将一个Condition节点从Condition队列移动到Sync队列
             /*
              * If cannot change waitStatus, the node has been cancelled.
+             * 将节点的状态从CONDITION -> 0, 也就是sync入队标准节点的起始状态。
              */
             if (!compareAndSetWaitStatus(node, Node.CONDITION, 0)) //CAS尝试修改节点waitStatus(-2 -> 0)
                 return false;
 
             /*
-             * Splice onto queue and try to set waitStatus of predecessor to
-             * indicate that thread is (probably) waiting. If cancelled or
-             * attempt to set waitStatus fails, wake up to resync (in which
-             * case the waitStatus can be transiently and harmlessly wrong).
+             * Splice onto queue and try to set waitStatus of predecessor to indicate that thread is (probably) waiting.
+             * If cancelled or attempt to set waitStatus fails, wake up to resync (in which case the waitStatus can be transiently and harmlessly wrong).
              */
             Node p = enq(node); //插入到Sync队列队尾
             int ws = p.waitStatus;
@@ -1658,9 +1656,8 @@ public abstract class AbstractQueuedSynchronizer extends AbstractOwnableSynchron
         }
 
         /**
-         * Transfers node, if necessary, to sync queue after a cancelled
-         * wait. Returns true if thread was cancelled before being
-         * signalled.
+         * Transfers node, if necessary, to sync queue after a cancelled wait. Returns true if thread was cancelled before being signalled.
+         *
          * @param current the waiting thread
          * @param node its node
          * @return true if cancelled before the node was signalled
@@ -1682,8 +1679,8 @@ public abstract class AbstractQueuedSynchronizer extends AbstractOwnableSynchron
         }
 
         /**
-         * Invokes release with current state value; returns saved state.
-         * Cancels node and throws exception on failure.
+         * Invokes release with current state value; returns saved state. Cancels node and throws exception on failure.
+         *
          * @param node the condition node for this wait
          * @return previous sync state
          */
@@ -1706,11 +1703,10 @@ public abstract class AbstractQueuedSynchronizer extends AbstractOwnableSynchron
         // Instrumentation methods for conditions
 
         /**
-         * Queries whether the given ConditionObject
-         * uses this synchronizer as its lock.
+         * Queries whether the given ConditionObject uses this synchronizer as its lock.
          *
          * @param condition the condition
-         * @return <tt>true</tt> if owned
+         * @return true if owned
          * @throws NullPointerException if the condition is null
          */
         public final boolean owns (ConditionObject condition){
@@ -1786,29 +1782,26 @@ public abstract class AbstractQueuedSynchronizer extends AbstractOwnableSynchron
         }
 
         /**
-         * Condition implementation for a {@link
-         * AbstractQueuedSynchronizer} serving as the basis of a {@link
-         * Lock} implementation.
+         * Condition implementation for a AbstractQueuedSynchronizer serving as the basis of a Lock implementation.
          *
-         * <p>Method documentation for this class describes mechanics,
-         * not behavioral specifications from the point of view of Lock
-         * and Condition users. Exported versions of this class will in
-         * general need to be accompanied by documentation describing
-         * condition semantics that rely on those of the associated
-         * <tt>AbstractQueuedSynchronizer</tt>.
+         * Method documentation for this class describes mechanics, not behavioral specifications from the point of view of Lock
+         * and Condition users. Exported versions of this class will in general need to be accompanied by documentation describing
+         * condition semantics that rely on those of the associated AbstractQueuedSynchronizer.
          *
-         * <p>This class is Serializable, but all fields are transient,
-         * so deserialized conditions have no waiters.
+         * This class is Serializable, but all fields are transient, so deserialized conditions have no waiters.
          */
         public class ConditionObject implements Condition, java.io.Serializable {
             private static final long serialVersionUID = 1173984872572414699L;
+
+            //每一个Condition对象都维护了一个等待队列，用于处理条件不满足时的阻塞线程节点
+
             /** First node of condition queue. */
             private transient Node firstWaiter;
             /** Last node of condition queue.  */
             private transient Node lastWaiter;
 
             /**
-             * Creates a new <tt>ConditionObject</tt> instance.
+             * Creates a new ConditionObject instance.
              */
             public ConditionObject() {
             }
@@ -1826,7 +1819,7 @@ public abstract class AbstractQueuedSynchronizer extends AbstractOwnableSynchron
                     unlinkCancelledWaiters();
                     t = lastWaiter;
                 }
-                Node node = new Node(Thread.currentThread(), Node.CONDITION); //新创建的COndition节点，waitStatus设为CONDITION(-2)
+                Node node = new Node(Thread.currentThread(), Node.CONDITION); //新创建的Condition节点，waitStatus设为CONDITION(-2)
                 if (t == null) //Condition队列还未初始化
                     firstWaiter = node;
                 else
@@ -1836,9 +1829,8 @@ public abstract class AbstractQueuedSynchronizer extends AbstractOwnableSynchron
             }
 
             /**
-             * Removes and transfers nodes until hit non-cancelled one or
-             * null. Split out from signal in part to encourage compilers
-             * to inline the case of no waiters.
+             * Removes and transfers nodes until hit non-cancelled one or null.
+             * Split out from signal in part to encourage compilers to inline the case of no waiters.
              * @param first (non-null) the first node on condition queue
              */
             private void doSignal(Node first) {

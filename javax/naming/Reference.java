@@ -1,26 +1,6 @@
 /*
  * Copyright (c) 1999, 2004, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
  */
 
 package javax.naming;
@@ -29,14 +9,11 @@ import java.util.Vector;
 import java.util.Enumeration;
 
 /**
-  * This class represents a reference to an object that is found outside of
-  * the naming/directory system.
-  *<p>
-  * Reference provides a way of recording address information about
-  * objects which themselves are not directly bound to the naming/directory system.
-  *<p>
-  * A Reference consists of an ordered list of addresses and class information
-  * about the object being referenced.
+  * This class represents a reference to an object that is found outside of the naming/directory system.
+  *
+  * Reference provides a way of recording address information about objects which themselves are not directly bound to the naming/directory system.
+  *
+  * A Reference consists of an ordered list of addresses and class information about the object being referenced.
   * Each address in the list identifies a communications endpoint
   * for the same conceptual object.  The "communications endpoint"
   * is information that indicates how to contact the object. It could
