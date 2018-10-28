@@ -307,6 +307,8 @@ public class WeakHashMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
 
     /**
      * Expunges stale entries from the table.
+     * GC回收的仅仅是Entry中由WeakReference指向的对象，而不是Entry本身，虽然GC线程向ReferenceQueue中存放的引用是Entry.
+     * 自动清理Entry的工作还是要由WeakHashMap本身完成
      */
     private void expungeStaleEntries() {
         for (Object x; (x = queue.poll()) != null; ) { //从ReferenceQueue中移除元素，该元素即是已被GC回收的对象的引用。
@@ -317,9 +319,10 @@ public class WeakHashMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
 
                 Entry<K,V> prev = table[i];
                 Entry<K,V> p = prev;
-                while (p != null) {
+                while (p != null) { //遍历i桶位链表
                     Entry<K,V> next = p.next;
-                    if (p == e) {
+                    if (p == e) { //找到了已经被GC回收的Entry
+                        //这里判断的区别在于是否已经遍历到了链表的尾节点，这里要负责被回收节点的移除和新链表的重建
                         if (prev == e)
                             table[i] = next;
                         else

@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 1997, 2006, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ *
  */
 
 package java.lang.ref;
@@ -75,7 +76,7 @@ public abstract class Reference<T> {
     private T referent;         /* Treated specially by GC */ //所指向的对象
 
     /*
-     * 引用队列，在检测到适当的可到达性更改后，GC将已注册的引用对象添加到该队列中.
+     * 引用队列，在检测到适当的可到达性更改后，GC将已注册的引用对象添加到该队列中.(先经由pending list，由ReferenceHandler执行入队)
      */
     ReferenceQueue<? super T> queue;
 
@@ -117,10 +118,10 @@ public abstract class Reference<T> {
         }
 
         public void run() {
-            for (; ; ) { //优先级最高的守护线程做无限循环，怎么退出呢？
+            for (; ; ) {
 
                 Reference r;
-                synchronized (lock) {
+                synchronized (lock) { //ReferenceHandler线程与GC线程基于这把锁的同步，完成了一个生产者消费者模型
                     if (pending != null) { //GC将该Reference指向的对象回收，并将该Reference对象放入pending
                         r = pending;
                         Reference rn = r.next;
@@ -128,7 +129,8 @@ public abstract class Reference<T> {
                         r.next = r;
                     } else {
                         try {
-                            lock.wait(); //是等待GC线程将其唤醒？
+                            //等待GC线程将其唤醒，这里要明确ReferenceHandler是一个全局的守护线程，在不作任何操作时应该挂起，避免浪费计算资源
+                            lock.wait();
                         } catch (InterruptedException x) {
                         }
                         continue;
@@ -154,6 +156,8 @@ public abstract class Reference<T> {
         for (ThreadGroup tgn = tg; tgn != null; tg = tgn, tgn = tg.getParent())
             ;
 
+        //优先级最高的守护线程，且运行期间做无限循环操作，也就意味着这是一个JVM线程生命周期基本一致的线程。
+        // 因为自Reference类被加载起，ReferenceHandler线程即被创建，pending list也被创建，这两者是全局的，参与所有该JVM创建的Reference的回收工作。
         Thread handler = new ReferenceHandler(tg, "Reference Handler");
         /*
          * If there were a special system-only priority greater than MAX_PRIORITY, it would be used here
