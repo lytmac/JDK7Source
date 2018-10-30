@@ -2,25 +2,6 @@
  * Copyright (c) 1997, 2008, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
  */
 
 package java.lang.ref;
@@ -28,30 +9,34 @@ package java.lang.ref;
 import java.security.PrivilegedAction;
 import java.security.AccessController;
 
+/*
+ * Package-private; must be in same package as the Reference class
+ */
+final class Finalizer extends FinalReference {
 
-final class Finalizer extends FinalReference { /* Package-private; must be in
-                                                  same package as the Reference
-                                                  class */
-
-    /* A native method that invokes an arbitrary object's finalize method is
-       required since the finalize method is protected
+    /*
+     * A native method that invokes an arbitrary object's finalize method is required since the finalize method is protected
      */
     static native void invokeFinalizeMethod(Object o) throws Throwable;
 
-    private static ReferenceQueue queue = new ReferenceQueue();
-    private static Finalizer unfinalized = null;
+    /** ============================================ 都是全局的 ====================================================== **/
+    private static ReferenceQueue queue = new ReferenceQueue(); //构造器决定了无法传入别的ReferenceQueue对象
+    private static Finalizer unfinalized = null; // 全局队列
     private static final Object lock = new Object();
+    /** ============================================================================================================ **/
 
-    private Finalizer
-        next = null,
-        prev = null;
+    private Finalizer next = null, prev = null; //单个Finalizer对象在unfinalized队列中的前后指向
 
     private boolean hasBeenFinalized() {
         return (next == this);
     }
 
+    /**
+     * 将当前对象插入到Finalizer对象链里，链里的对象和Finalizer类静态关联。
+     * 言外之意是在这个链里的对象都无法被GC掉，除非将这种引用关系剥离（因为Finalizer类无法被unload）
+     */
     private void add() {
-        synchronized (lock) {
+        synchronized (lock) { //队首插入节点
             if (unfinalized != null) {
                 this.next = unfinalized;
                 unfinalized.prev = this;
@@ -69,12 +54,15 @@ final class Finalizer extends FinalReference { /* Package-private; must be in
                     unfinalized = this.prev;
                 }
             }
+
             if (this.next != null) {
                 this.next.prev = this.prev;
             }
+
             if (this.prev != null) {
                 this.prev.next = this.next;
             }
+
             this.next = this;   /* Indicates that this has been finalized */
             this.prev = this;
         }
@@ -107,18 +95,14 @@ final class Finalizer extends FinalReference { /* Package-private; must be in
         super.clear();
     }
 
-    /* Create a privileged secondary finalizer thread in the system thread
-       group for the given Runnable, and wait for it to complete.
+    /**
+     * Create a privileged secondary finalizer thread in the system thread group for the given Runnable, and wait for it to complete.
 
-       This method is used by both runFinalization and runFinalizersOnExit.
-       The former method invokes all pending finalizers, while the latter
-       invokes all uninvoked finalizers if on-exit finalization has been
-       enabled.
+     * This method is used by both runFinalization and runFinalizersOnExit.
+     * The former method invokes all pending finalizers, while the latter invokes all uninvoked finalizers if on-exit finalization has been enabled.
 
-       These two methods could have been implemented by offloading their work
-       to the regular finalizer thread and waiting for that thread to finish.
-       The advantage of creating a fresh thread, however, is that it insulates
-       invokers of these methods from a stalled or deadlocked finalizer thread.
+     * These two methods could have been implemented by offloading their work to the regular finalizer thread and waiting for that thread to finish.
+     * The advantage of creating a fresh thread, however, is that it insulates invokers of these methods from a stalled or deadlocked finalizer thread.
      */
     private static void forkSecondaryFinalizer(final Runnable proc) {
         AccessController.doPrivileged(
@@ -197,10 +181,10 @@ final class Finalizer extends FinalReference { /* Package-private; must be in
 
     static {
         ThreadGroup tg = Thread.currentThread().getThreadGroup();
-        for (ThreadGroup tgn = tg;
-             tgn != null;
-             tg = tgn, tgn = tg.getParent());
+        for (ThreadGroup tgn = tg; tgn != null; tg = tgn, tgn = tg.getParent());
         Thread finalizer = new FinalizerThread(tg);
+
+        //同样是一个守护线程，但是优先级不是最高的，生命周期基本与JVM一致
         finalizer.setPriority(Thread.MAX_PRIORITY - 2);
         finalizer.setDaemon(true);
         finalizer.start();
