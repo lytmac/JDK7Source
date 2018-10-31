@@ -9,8 +9,9 @@ package java.lang.ref;
 import java.security.PrivilegedAction;
 import java.security.AccessController;
 
-/*
+/**
  * Package-private; must be in same package as the Reference class
+ * JVM在加载一个类是，会遍历当前类的所有方法包括父类的方法。只要有一个参数为空且返回void的非空finalize方法，就认为该类是Finalizer类
  */
 final class Finalizer extends FinalReference {
 
@@ -19,36 +20,43 @@ final class Finalizer extends FinalReference {
      */
     static native void invokeFinalizeMethod(Object o) throws Throwable;
 
-    /** ============================================ 都是全局的 ====================================================== **/
+    /**==============================================都是全局的======================================================**/
     private static ReferenceQueue queue = new ReferenceQueue(); //构造器决定了无法传入别的ReferenceQueue对象
-    private static Finalizer unfinalized = null; // 全局队列
+    private static Finalizer unfinalized = null; // 全局链表
     private static final Object lock = new Object();
-    /** ============================================================================================================ **/
+    /**==============================================================================================================**/
 
-    private Finalizer next = null, prev = null; //单个Finalizer对象在unfinalized队列中的前后指向
+    private Finalizer next = null, prev = null; //单个Finalizer对象在unfinalized list中的前后指向
 
+    /**
+     * 判断对象是否还在unfinalized list中。
+     * Finalizer类的对象在创建时即已加入到unfinalized list中，执行完finalize方法后从list中移除
+     * @return
+     */
     private boolean hasBeenFinalized() {
+        //从 unfinalized list中移除后，会将next和prev都指向自己。
         return (next == this);
     }
 
     /**
-     * 将当前对象插入到Finalizer对象链里，链里的对象和Finalizer类静态关联。
-     * 言外之意是在这个链里的对象都无法被GC掉，除非将这种引用关系剥离（因为Finalizer类无法被unload）
+     * 将当前引用加入到全局的unfinalized list里，等待FinalizeThread执行finalize()
      */
     private void add() {
-        synchronized (lock) { //队首插入节点
+        synchronized (lock) {
             if (unfinalized != null) {
                 this.next = unfinalized;
                 unfinalized.prev = this;
             }
+
+            //队首插入节点
             unfinalized = this;
         }
     }
 
     private void remove() {
         synchronized (lock) {
-            if (unfinalized == this) {
-                if (this.next != null) {
+            if (unfinalized == this) { //本节点就在unfinalized list的队首
+                if (this.next != null) { // unfinalized list还有后序节点
                     unfinalized = this.next;
                 } else {
                     unfinalized = this.prev;
@@ -63,8 +71,10 @@ final class Finalizer extends FinalReference {
                 this.prev.next = this.next;
             }
 
-            this.next = this;   /* Indicates that this has been finalized */
+            // 从队列移除后，将next和prev都指向自己，标识方法已执行
+            this.next = this;
             this.prev = this;
+
         }
     }
 
@@ -73,10 +83,18 @@ final class Finalizer extends FinalReference {
         add();
     }
 
-    /* Invoked by VM */
+    /**============================================== Invoked by VM =================================================**/
+    /**
+     * 在JVM创建对象时，会检查该对象所属的类是否是Finalizer类。
+     * 若不是Finalizer类，则直接创建对象；
+     * 若是Finalizer类，则检查JVM参数：RegisterFinalizerAsInit(默认值为：true)。
+        * 若RegisterFinalizerAsInit设为true，则在初始化之前调用register方法；
+        * 若RegisterFinalizerAsInit设为true
+     */
     static void register(Object finalizee) {
         new Finalizer(finalizee);
     }
+    /** =============================================================================================================**/
 
     private void runFinalizer() {
         synchronized (this) {
@@ -170,6 +188,7 @@ final class Finalizer extends FinalReference {
             running = true;
             for (;;) {
                 try {
+                    //从ReferenceQueue中移除，然后执行该类重写的finalize方法。
                     Finalizer f = (Finalizer)queue.remove();
                     f.runFinalizer();
                 } catch (InterruptedException x) {
@@ -184,7 +203,8 @@ final class Finalizer extends FinalReference {
         for (ThreadGroup tgn = tg; tgn != null; tg = tgn, tgn = tg.getParent());
         Thread finalizer = new FinalizerThread(tg);
 
-        //同样是一个守护线程，但是优先级不是最高的，生命周期基本与JVM一致
+        // 同样是一个守护线程，但是优先级不是最高的。这意味着在CPU资源吃紧时，可能会无法抢占到资源执行。
+        // 这也是为什么说不要依赖重写finalize方法完成一些关键操作，因为FinalizerThread可能无法及时执行finalize方法。
         finalizer.setPriority(Thread.MAX_PRIORITY - 2);
         finalizer.setDaemon(true);
         finalizer.start();

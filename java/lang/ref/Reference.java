@@ -26,7 +26,8 @@ public abstract class Reference<T> {
      *
          * Active: Subject to special treatment by the garbage collector.
          *
-         * 状态变换路径有两种：Active -> Pending / Active -> Inactive。具体取决于实例是否在创建时向队列注册
+         * 状态变换路径有两种：Active -> Pending / Active -> Inactive。具体取决于实例是否在创建时向队列注册(是否初始化了ReferenceQueue字段)
+         * 引用的可达性变化，是否就是该对象已经没有强引用了？那么这时对象回收了吗？
          * Some time after the collector detects that the reachability of the referent has changed to the appropriate state,
          * it changes the instance's state to either Pending or Inactive, depending upon whether or not the instance was
          * registered with a queue when it was created. In the former case it also adds the instance to the pending-Reference list.
@@ -34,14 +35,11 @@ public abstract class Reference<T> {
          * 新创建的对象状态都是Active
          * Newly-created instances are Active.
          *
-         *
          * Pending: An element of the pending-Reference list, waiting to be enqueued by the Reference-handler thread. Unregistered instances are never in this state.
          *
          * 该Reference对象已经入ReferenceQueue了，意味着该Reference指向的对象已经被GC回收了
          * Enqueued: An element of the queue with which the instance was registered when it was created.
-         *
-         * When an instance is removed from its ReferenceQueue, it is made Inactive.
-         * Unregistered instances are never in this state.
+         * When an instance is removed from its ReferenceQueue, it is made Inactive. Unregistered instances are never in this state.
          *
          * Inactive: Nothing more to do.
          * Once an instance becomes Inactive its state will never change again.
@@ -102,11 +100,11 @@ public abstract class Reference<T> {
 
 
     /* List of References waiting to be enqueued.(等待进入ReferenceQueue的Reference对象)
-     * 需要明确的是：GC只是将回收的对象的Reference引用加入到pending队列，然后由ReferenceHandler将其移除
+     * 需要明确的是：GC只是将回收的对象的Reference引用加入到pending list，然后由ReferenceHandler将其移至ReferenceQueue
      * The collector adds References to this list, while the Reference-handler thread removes them.
      * This list is protected by the above lock object.
      */
-    private static Reference pending = null; //这是一个全局的pending list的头指针
+    private static Reference pending = null; //这是全局链表pending list的头指针
 
     /*
      * High-priority thread to enqueue pending References
@@ -123,10 +121,14 @@ public abstract class Reference<T> {
                 Reference r;
                 synchronized (lock) { //ReferenceHandler线程与GC线程基于这把锁的同步，完成了一个生产者消费者模型
                     if (pending != null) { //GC将该Reference指向的对象回收，并将该Reference对象放入pending
+
+                        /**==========================遍历结束的标识是：rn == r == null===============================**/
                         r = pending;
                         Reference rn = r.next;
-                        pending = (rn == r) ? null : rn; //当前reference == reference.next,意味着pending队列已经为空了
-                        r.next = r;
+                        pending = (rn == r) ? null : rn;
+                        r.next = r; //遍历结束时，每个已移除pending list的Reference.next == null，不过这是中间状态，很快又要压入ReferenceQueue队列
+                        /**==========================================================================================**/
+
                     } else {
                         try {
                             //等待GC线程将其唤醒，这里要明确ReferenceHandler是一个全局的守护线程，在不作任何操作时应该挂起，避免浪费计算资源
@@ -143,8 +145,9 @@ public abstract class Reference<T> {
                     continue;
                 }
 
-                //将该Reference压入ReferenceQueue
+                //将该Reference压入ReferenceQueue，注意pending list是全局唯一的，而ReferenceQueue则是各个Reference对象私有的。
                 ReferenceQueue q = r.queue;
+                //如果创建Reference对象时未初始化ReferenceQueue字段(也就是所谓的未注册ReferenceQueue)，则无需入队，即默认无需GC通知机制。
                 if (q != ReferenceQueue.NULL)
                     q.enqueue(r);
             }
