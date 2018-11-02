@@ -20,7 +20,7 @@ final class Finalizer extends FinalReference {
      */
     static native void invokeFinalizeMethod(Object o) throws Throwable;
 
-    /**==============================================都是全局的======================================================**/
+    /**================================================都是全局的======================================================**/
     private static ReferenceQueue queue = new ReferenceQueue(); //构造器决定了无法传入别的ReferenceQueue对象
     private static Finalizer unfinalized = null; // 全局链表
     private static final Object lock = new Object();
@@ -85,11 +85,11 @@ final class Finalizer extends FinalReference {
 
     /**============================================== Invoked by VM =================================================**/
     /**
-     * 在JVM创建对象时，会检查该对象所属的类是否是Finalizer类。
-     * 若不是Finalizer类，则直接创建对象；
-     * 若是Finalizer类，则检查JVM参数：RegisterFinalizerAsInit(默认值为：true)。
-        * 若RegisterFinalizerAsInit设为true，则在初始化之前调用register方法；
-        * 若RegisterFinalizerAsInit设为true
+     * 在JVM创建对象时，会检查该对象所属的类是否重写了Object.finalize()。
+     * 若未重写，则直接创建对象；
+     * 若已重写，则再创建Finalizer对象(又包了个壳)，该操作是在原对象初始化前后取决于JVM参数：RegisterFinalizerAsInit(默认值为：true)。
+        * 若RegisterFinalizerAsInit设为false，则在初始化之前创建Finalizer对象；
+        * 若RegisterFinalizerAsInit设为true，则在初始化之后创建Finalizer对象。
      */
     static void register(Object finalizee) {
         new Finalizer(finalizee);
