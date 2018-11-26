@@ -110,7 +110,7 @@ final class Finalizer extends FinalReference {
                 finalizee = null;
             }
         } catch (Throwable x) { }
-        super.clear();
+        super.clear(); //this.referent = null，等价于：finalizee = null。这样做是为了避免执行外部代码定义的finalizee()抛异常导致finalizee = null无法执行。
     }
 
     /**

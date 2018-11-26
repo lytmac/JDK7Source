@@ -26,8 +26,10 @@ public class ReferenceQueue<T> {
         }
     }
 
+    /**=============================================== 全局变量 ======================================================**/
     static ReferenceQueue NULL = new Null();
     static ReferenceQueue ENQUEUED = new Null();
+    /**==============================================================================================================**/
 
     static private class Lock { };
     private Lock lock = new Lock();
@@ -36,13 +38,14 @@ public class ReferenceQueue<T> {
 
     boolean enqueue(Reference<? extends T> r) { /* Called only by Reference class */
         synchronized (r) {
-            if (r.queue == ENQUEUED) return false;
+            if (r.queue == ENQUEUED) //该引用对象未注册ReferenceQueue
+                return false;
             synchronized (lock) {
                 r.queue = ENQUEUED;
                 r.next = (head == null) ? r : head;
                 head = r;
                 queueLength++;
-                if (r instanceof FinalReference) {
+                if (r instanceof FinalReference) { //对Finalizer做特殊的处理
                     sun.misc.VM.addFinalRefCount(1);
                 }
                 lock.notifyAll();

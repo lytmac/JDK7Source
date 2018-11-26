@@ -646,7 +646,7 @@ class Bits {                            // package-private
             }
         }
 
-        System.gc();
+        System.gc(); //触发full GC，以触发cleaner回收堆外内存
         try {
             Thread.sleep(100);
         } catch (InterruptedException x) {

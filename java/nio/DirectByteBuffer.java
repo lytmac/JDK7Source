@@ -2,25 +2,6 @@
  * Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
  */
 
 // -- This file was mechanically generated: Do not edit! -- //
@@ -34,16 +15,7 @@ import sun.misc.VM;
 import sun.nio.ch.DirectBuffer;
 
 
-class DirectByteBuffer
-
-    extends MappedByteBuffer
-
-
-
-    implements DirectBuffer
-{
-
-
+class DirectByteBuffer extends MappedByteBuffer implements DirectBuffer {
 
     // Cached unsafe-access object
     protected static final Unsafe unsafe = Bits.unsafe();
@@ -69,9 +41,7 @@ class DirectByteBuffer
 
 
 
-    private static class Deallocator
-        implements Runnable
-    {
+    private static class Deallocator implements Runnable {
 
         private static Unsafe unsafe = Unsafe.getUnsafe();
 
@@ -102,19 +72,9 @@ class DirectByteBuffer
 
     public Cleaner cleaner() { return cleaner; }
 
-
-
-
-
-
-
-
-
-
-
     // Primary constructor
-    //
-    DirectByteBuffer(int cap) {                   // package-private
+    // package-private
+    DirectByteBuffer(int cap) {
 
         super(-1, 0, cap, cap);
         boolean pa = VM.isDirectMemoryPageAligned();
@@ -138,16 +98,12 @@ class DirectByteBuffer
         }
         cleaner = Cleaner.create(this, new Deallocator(base, size, cap));
         att = null;
-
-
-
     }
 
 
 
-    // Invoked to construct a direct ByteBuffer referring to the block of
-    // memory. A given arbitrary object may also be attached to the buffer.
-    //
+    // Invoked to construct a direct ByteBuffer referring to the block of memory.
+    // A given arbitrary object may also be attached to the buffer.
     DirectByteBuffer(long addr, int cap, Object ob) {
         super(-1, 0, cap, cap);
         address = addr;
