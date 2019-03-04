@@ -135,7 +135,7 @@ public class HashMap<K, V>
      * by either of the constructors with arguments.
      * MUST be a power of two <= 1<<30.
      */
-    static final int MAXIMUM_CAPACITY = 1 << 30; // aka 2^30
+    static final int MAXIMUM_CAPACITY = 1 << 30; // aka 2^30 最大的2的幂
 
     /**
      * The load factor used when none specified in constructor.
@@ -899,7 +899,7 @@ public class HashMap<K, V>
             /**
              * 扩容的条件需同时满足以下两条：
              * 1. 当前size已经大于等于阈值了
-             * 2. 待插入的Entry所在桶节点的链表不为空(链表为空则表明当前的hash并不均匀，那么为什么不resize呢？)
+             * 2. 待插入的Entry所在桶节点的链表不为空(为空的话就意味着当前槽位还没有节点,当前hash并不均匀)
              */
             resize(2 * table.length);
             hash = (null != key) ? hash(key) : 0; //扩容为什么还要重新计算hash呢？如果不换hash算法，hash值是一直不会变的啊

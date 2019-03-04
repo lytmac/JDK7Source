@@ -1,26 +1,7 @@
 /*
  * Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * 
  */
 
 package java.nio.channels;
@@ -39,59 +20,34 @@ import java.util.Collections;
 /**
  * A channel for reading, writing, mapping, and manipulating a file.
  *
- * <p> A file channel is a {@link SeekableByteChannel} that is connected to
- * a file. It has a current <i>position</i> within its file which can
- * be both {@link #position() <i>queried</i>} and {@link #position(long)
- * <i>modified</i>}.  The file itself contains a variable-length sequence
- * of bytes that can be read and written and whose current {@link #size
- * <i>size</i>} can be queried.  The size of the file increases
- * when bytes are written beyond its current size; the size of the file
- * decreases when it is {@link #truncate </code><i>truncated</i><code>}.  The
- * file may also have some associated <i>metadata</i> such as access
- * permissions, content type, and last-modification time; this class does not
- * define methods for metadata access.
+ * A file channel is a SeekableByteChannel that is connected to a file. It has a current position within its file which can be both position()
+ * queried and position(long) modified. The file itself contains a variable-length sequence of bytes that can be read and written and whose
+ * current size can be queried. The size of the file increases when bytes are written beyond its current size; the size of the file decreases
+ * when it is truncated. The file may also have some associated metadata such as access permissions, content type, and last-modification time;
+ * this class does not define methods for metadata access.
  *
- * <p> In addition to the familiar read, write, and close operations of byte
- * channels, this class defines the following file-specific operations: </p>
+ * In addition to the familiar read, write, and close operations of byte channels, this class defines the following file-specific operations:
  *
- * <ul>
+ *   Bytes may be read(ByteBuffer, long) or write(ByteBuffer, long) at an absolute position in a file in a way that does not affect the
+ *   channel's current position.
  *
- *   <li><p> Bytes may be {@link #read(ByteBuffer, long) read} or
- *   {@link #write(ByteBuffer, long) <i>written</i>} at an absolute
- *   position in a file in a way that does not affect the channel's current
- *   position.  </p></li>
+ *   A region of a file may be map directly into memory; for large files this is often much more efficient than invoking the usual read
+ *   or write methods.
  *
- *   <li><p> A region of a file may be {@link #map <i>mapped</i>}
- *   directly into memory; for large files this is often much more efficient
- *   than invoking the usual <tt>read</tt> or <tt>write</tt> methods.
- *   </p></li>
+ *   Updates made to a file may be force out to the underlying storage device, ensuring that data are not lost in the event of a system crash.
  *
- *   <li><p> Updates made to a file may be {@link #force <i>forced
- *   out</i>} to the underlying storage device, ensuring that data are not
- *   lost in the event of a system crash.  </p></li>
+ *   Bytes can be transferred from a file transferTo to some other channel, and transferFrom vice versa, in a way that can be optimized
+ *   by many operating systems into a very fast transfer directly to or from the filesystem cache.
  *
- *   <li><p> Bytes can be transferred from a file {@link #transferTo <i>to
- *   some other channel</i>}, and {@link #transferFrom <i>vice
- *   versa</i>}, in a way that can be optimized by many operating systems
- *   into a very fast transfer directly to or from the filesystem cache.
- *   </p></li>
+ *   A region of a file may be FileLocked against access by other programs.
  *
- *   <li><p> A region of a file may be {@link FileLock <i>locked</i>}
- *   against access by other programs.  </p></li>
+ * File channels are safe for use by multiple concurrent threads. The Channel#close method may be invoked at any time, as specified by the
+ * Channel interface. Only one operation that involves the channel's position or can change its file's size may be in progress at any given
+ * time; attempts to initiate a second such operation while the first is still in progress will block until the first operation completes.
+ * Other operations, in particular those that take an explicit position, may proceed concurrently; whether they in fact do so is dependent
+ * upon the underlying implementation and is therefore unspecified.
  *
- * </ul>
- *
- * <p> File channels are safe for use by multiple concurrent threads.  The
- * {@link Channel#close close} method may be invoked at any time, as specified
- * by the {@link Channel} interface.  Only one operation that involves the
- * channel's position or can change its file's size may be in progress at any
- * given time; attempts to initiate a second such operation while the first is
- * still in progress will block until the first operation completes.  Other
- * operations, in particular those that take an explicit position, may proceed
- * concurrently; whether they in fact do so is dependent upon the underlying
- * implementation and is therefore unspecified.
- *
- * <p> The view of a file provided by an instance of this class is guaranteed
+ * The view of a file provided by an instance of this class is guaranteed
  * to be consistent with other views of the same file provided by other
  * instances in the same program.  The view provided by an instance of this
  * class may or may not, however, be consistent with the views seen by other
@@ -102,10 +58,10 @@ import java.util.Collections;
  * machine.  The exact nature of any such inconsistencies are system-dependent
  * and are therefore unspecified.
  *
- * <p> A file channel is created by invoking one of the {@link #open open}
+ * A file channel is created by invoking one of the  #open open}
  * methods defined by this class. A file channel can also be obtained from an
- * existing {@link java.io.FileInputStream#getChannel FileInputStream}, {@link
- * java.io.FileOutputStream#getChannel FileOutputStream}, or {@link
+ * existing  java.io.FileInputStream#getChannel FileInputStream}, 
+ * java.io.FileOutputStream#getChannel FileOutputStream}, or 
  * java.io.RandomAccessFile#getChannel RandomAccessFile} object by invoking
  * that object's <tt>getChannel</tt> method, which returns a file channel that
  * is connected to the same underlying file. Where the file channel is obtained
@@ -118,29 +74,24 @@ import java.util.Collections;
  * versa.  Changing the file's content by writing bytes will change the content
  * seen by the originating object, and vice versa.
  *
- * <a name="open-mode"></a> <p> At various points this class specifies that an
+ * <a name="open-mode"></a> At various points this class specifies that an
  * instance that is "open for reading," "open for writing," or "open for
- * reading and writing" is required.  A channel obtained via the {@link
- * java.io.FileInputStream#getChannel getChannel} method of a {@link
+ * reading and writing" is required.  A channel obtained via the 
+ * java.io.FileInputStream#getChannel getChannel} method of a 
  * java.io.FileInputStream} instance will be open for reading.  A channel
- * obtained via the {@link java.io.FileOutputStream#getChannel getChannel}
- * method of a {@link java.io.FileOutputStream} instance will be open for
- * writing.  Finally, a channel obtained via the {@link
- * java.io.RandomAccessFile#getChannel getChannel} method of a {@link
+ * obtained via the  java.io.FileOutputStream#getChannel getChannel}
+ * method of a  java.io.FileOutputStream} instance will be open for
+ * writing.  Finally, a channel obtained via the 
+ * java.io.RandomAccessFile#getChannel getChannel} method of a 
  * java.io.RandomAccessFile} instance will be open for reading if the instance
  * was created with mode <tt>"r"</tt> and will be open for reading and writing
  * if the instance was created with mode <tt>"rw"</tt>.
  *
- * <a name="append-mode"></a><p> A file channel that is open for writing may be in
- * <i>append mode</i>, for example if it was obtained from a file-output stream
- * that was created by invoking the {@link
- * java.io.FileOutputStream#FileOutputStream(java.io.File,boolean)
- * FileOutputStream(File,boolean)} constructor and passing <tt>true</tt> for
- * the second parameter.  In this mode each invocation of a relative write
- * operation first advances the position to the end of the file and then writes
- * the requested data.  Whether the advancement of the position and the writing
- * of the data are done in a single atomic operation is system-dependent and
- * therefore unspecified.
+ * A file channel that is open for writing may be in append mode, for example if it was obtained from a file-output stream that was created
+ * by invoking the java.io.FileOutputStream#FileOutputStream(java.io.File, boolean) FileOutputStream(File,boolean) constructor and passing
+ * true for the second parameter. In this mode each invocation of a relative write operation first advances the position to the end of the
+ * file and then writes the requested data. Whether the advancement of the position and the writing of the data are done in a single atomic
+ * operation is system-dependent and therefore unspecified.
  *
  * @see java.io.FileInputStream#getChannel()
  * @see java.io.FileOutputStream#getChannel()
@@ -164,20 +115,20 @@ public abstract class FileChannel
     /**
      * Opens or creates a file, returning a file channel to access the file.
      *
-     * <p> The {@code options} parameter determines how the file is opened.
-     * The {@link StandardOpenOption#READ READ} and {@link StandardOpenOption#WRITE
+     * The {@code options} parameter determines how the file is opened.
+     * The  StandardOpenOption#READ READ} and  StandardOpenOption#WRITE
      * WRITE} options determine if the file should be opened for reading and/or
-     * writing. If neither option (or the {@link StandardOpenOption#APPEND APPEND}
+     * writing. If neither option (or the  StandardOpenOption#APPEND APPEND}
      * option) is contained in the array then the file is opened for reading.
      * By default reading or writing commences at the beginning of the file.
      *
-     * <p> In the addition to {@code READ} and {@code WRITE}, the following
+     * In the addition to {@code READ} and {@code WRITE}, the following
      * options may be present:
      *
      * <table border=1 cellpadding=5 summary="">
      * <tr> <th>Option</th> <th>Description</th> </tr>
      * <tr>
-     *   <td> {@link StandardOpenOption#APPEND APPEND} </td>
+     *   <td>  StandardOpenOption#APPEND APPEND} </td>
      *   <td> If this option is present then the file is opened for writing and
      *     each invocation of the channel's {@code write} method first advances
      *     the position to the end of the file and then writes the requested
@@ -187,13 +138,13 @@ public abstract class FileChannel
      *     with the {@code READ} or {@code TRUNCATE_EXISTING} options. </td>
      * </tr>
      * <tr>
-     *   <td> {@link StandardOpenOption#TRUNCATE_EXISTING TRUNCATE_EXISTING} </td>
+     *   <td>  StandardOpenOption#TRUNCATE_EXISTING TRUNCATE_EXISTING} </td>
      *   <td> If this option is present then the existing file is truncated to
      *   a size of 0 bytes. This option is ignored when the file is opened only
      *   for reading. </td>
      * </tr>
      * <tr>
-     *   <td> {@link StandardOpenOption#CREATE_NEW CREATE_NEW} </td>
+     *   <td>  StandardOpenOption#CREATE_NEW CREATE_NEW} </td>
      *   <td> If this option is present then a new file is created, failing if
      *   the file already exists. When creating a file the check for the
      *   existence of the file and the creation of the file if it does not exist
@@ -201,7 +152,7 @@ public abstract class FileChannel
      *   ignored when the file is opened only for reading. </td>
      * </tr>
      * <tr>
-     *   <td > {@link StandardOpenOption#CREATE CREATE} </td>
+     *   <td >  StandardOpenOption#CREATE CREATE} </td>
      *   <td> If this option is present then an existing file is opened if it
      *   exists, otherwise a new file is created. When creating a file the check
      *   for the existence of the file and the creation of the file if it does
@@ -210,28 +161,28 @@ public abstract class FileChannel
      *   the file is opened only for reading. </td>
      * </tr>
      * <tr>
-     *   <td > {@link StandardOpenOption#DELETE_ON_CLOSE DELETE_ON_CLOSE} </td>
+     *   <td >  StandardOpenOption#DELETE_ON_CLOSE DELETE_ON_CLOSE} </td>
      *   <td> When this option is present then the implementation makes a
      *   <em>best effort</em> attempt to delete the file when closed by the
-     *   the {@link #close close} method. If the {@code close} method is not
+     *   the  #close close} method. If the {@code close} method is not
      *   invoked then a <em>best effort</em> attempt is made to delete the file
      *   when the Java virtual machine terminates. </td>
      * </tr>
      * <tr>
-     *   <td>{@link StandardOpenOption#SPARSE SPARSE} </td>
+     *   <td> StandardOpenOption#SPARSE SPARSE} </td>
      *   <td> When creating a new file this option is a <em>hint</em> that the
      *   new file will be sparse. This option is ignored when not creating
      *   a new file. </td>
      * </tr>
      * <tr>
-     *   <td> {@link StandardOpenOption#SYNC SYNC} </td>
+     *   <td>  StandardOpenOption#SYNC SYNC} </td>
      *   <td> Requires that every update to the file's content or metadata be
      *   written synchronously to the underlying storage device. (see <a
      *   href="../file/package-summary.html#integrity"> Synchronized I/O file
      *   integrity</a>). </td>
      * <tr>
      * <tr>
-     *   <td> {@link StandardOpenOption#DSYNC DSYNC} </td>
+     *   <td>  StandardOpenOption#DSYNC DSYNC} </td>
      *   <td> Requires that every update to the file's content be written
      *   synchronously to the underlying storage device. (see <a
      *   href="../file/package-summary.html#integrity"> Synchronized I/O file
@@ -239,12 +190,12 @@ public abstract class FileChannel
      * </tr>
      * </table>
      *
-     * <p> An implementation may also support additional options.
+     * An implementation may also support additional options.
      *
-     * <p> The {@code attrs} parameter is an optional array of file {@link
+     * The {@code attrs} parameter is an optional array of file 
      * FileAttribute file-attributes} to set atomically when creating the file.
      *
-     * <p> The new channel is created by invoking the {@link
+     * The new channel is created by invoking the 
      * FileSystemProvider#newFileChannel newFileChannel} method on the
      * provider that created the {@code Path}.
      *
@@ -270,9 +221,9 @@ public abstract class FileChannel
      * @throws  SecurityException
      *          If a security manager is installed and it denies an
      *          unspecified permission required by the implementation.
-     *          In the case of the default provider, the {@link
+     *          In the case of the default provider, the 
      *          SecurityManager#checkRead(String)} method is invoked to check
-     *          read access if the file is opened for reading. The {@link
+     *          read access if the file is opened for reading. The 
      *          SecurityManager#checkWrite(String)} method is invoked to check
      *          write access if the file is opened for writing
      *
@@ -292,10 +243,10 @@ public abstract class FileChannel
     /**
      * Opens or creates a file, returning a file channel to access the file.
      *
-     * <p> An invocation of this method behaves in exactly the same way as the
+     * An invocation of this method behaves in exactly the same way as the
      * invocation
      * <pre>
-     *     fc.{@link #open(Path,Set,FileAttribute[]) open}(file, opts, new FileAttribute&lt;?&gt;[0]);
+     *     fc. #open(Path,Set,FileAttribute[]) open}(file, opts, new FileAttribute&lt;?&gt;[0]);
      * </pre>
      * where {@code opts} is a set of the options specified in the {@code
      * options} array.
@@ -318,9 +269,9 @@ public abstract class FileChannel
      * @throws  SecurityException
      *          If a security manager is installed and it denies an
      *          unspecified permission required by the implementation.
-     *          In the case of the default provider, the {@link
+     *          In the case of the default provider, the 
      *          SecurityManager#checkRead(String)} method is invoked to check
-     *          read access if the file is opened for reading. The {@link
+     *          read access if the file is opened for reading. The 
      *          SecurityManager#checkWrite(String)} method is invoked to check
      *          write access if the file is opened for writing
      *
@@ -339,9 +290,9 @@ public abstract class FileChannel
     /**
      * Reads a sequence of bytes from this channel into the given buffer.
      *
-     * <p> Bytes are read starting at this channel's current file position, and
+     * Bytes are read starting at this channel's current file position, and
      * then the file position is updated with the number of bytes actually
-     * read.  Otherwise this method behaves exactly as specified in the {@link
+     * read.  Otherwise this method behaves exactly as specified in the 
      * ReadableByteChannel} interface. </p>
      */
     public abstract int read(ByteBuffer dst) throws IOException;
@@ -350,9 +301,9 @@ public abstract class FileChannel
      * Reads a sequence of bytes from this channel into a subsequence of the
      * given buffers.
      *
-     * <p> Bytes are read starting at this channel's current file position, and
+     * Bytes are read starting at this channel's current file position, and
      * then the file position is updated with the number of bytes actually
-     * read.  Otherwise this method behaves exactly as specified in the {@link
+     * read.  Otherwise this method behaves exactly as specified in the 
      * ScatteringByteChannel} interface.  </p>
      */
     public abstract long read(ByteBuffer[] dsts, int offset, int length)
@@ -361,9 +312,9 @@ public abstract class FileChannel
     /**
      * Reads a sequence of bytes from this channel into the given buffers.
      *
-     * <p> Bytes are read starting at this channel's current file position, and
+     * Bytes are read starting at this channel's current file position, and
      * then the file position is updated with the number of bytes actually
-     * read.  Otherwise this method behaves exactly as specified in the {@link
+     * read.  Otherwise this method behaves exactly as specified in the 
      * ScatteringByteChannel} interface.  </p>
      */
     public final long read(ByteBuffer[] dsts) throws IOException {
@@ -373,12 +324,12 @@ public abstract class FileChannel
     /**
      * Writes a sequence of bytes to this channel from the given buffer.
      *
-     * <p> Bytes are written starting at this channel's current file position
+     * Bytes are written starting at this channel's current file position
      * unless the channel is in append mode, in which case the position is
      * first advanced to the end of the file.  The file is grown, if necessary,
      * to accommodate the written bytes, and then the file position is updated
      * with the number of bytes actually written.  Otherwise this method
-     * behaves exactly as specified by the {@link WritableByteChannel}
+     * behaves exactly as specified by the  WritableByteChannel}
      * interface. </p>
      */
     public abstract int write(ByteBuffer src) throws IOException;
@@ -387,12 +338,12 @@ public abstract class FileChannel
      * Writes a sequence of bytes to this channel from a subsequence of the
      * given buffers.
      *
-     * <p> Bytes are written starting at this channel's current file position
+     * Bytes are written starting at this channel's current file position
      * unless the channel is in append mode, in which case the position is
      * first advanced to the end of the file.  The file is grown, if necessary,
      * to accommodate the written bytes, and then the file position is updated
      * with the number of bytes actually written.  Otherwise this method
-     * behaves exactly as specified in the {@link GatheringByteChannel}
+     * behaves exactly as specified in the  GatheringByteChannel}
      * interface.  </p>
      */
     public abstract long write(ByteBuffer[] srcs, int offset, int length)
@@ -401,12 +352,12 @@ public abstract class FileChannel
     /**
      * Writes a sequence of bytes to this channel from the given buffers.
      *
-     * <p> Bytes are written starting at this channel's current file position
+     * Bytes are written starting at this channel's current file position
      * unless the channel is in append mode, in which case the position is
      * first advanced to the end of the file.  The file is grown, if necessary,
      * to accommodate the written bytes, and then the file position is updated
      * with the number of bytes actually written.  Otherwise this method
-     * behaves exactly as specified in the {@link GatheringByteChannel}
+     * behaves exactly as specified in the  GatheringByteChannel}
      * interface.  </p>
      */
     public final long write(ByteBuffer[] srcs) throws IOException {
@@ -434,7 +385,7 @@ public abstract class FileChannel
     /**
      * Sets this channel's file position.
      *
-     * <p> Setting the position to a value that is greater than the file's
+     * Setting the position to a value that is greater than the file's
      * current size is legal but does not change the size of the file.  A later
      * attempt to read bytes at such a position will immediately return an
      * end-of-file indication.  A later attempt to write bytes at such a
@@ -476,7 +427,7 @@ public abstract class FileChannel
     /**
      * Truncates this channel's file to the given size.
      *
-     * <p> If the given size is less than the file's current size then the file
+     * If the given size is less than the file's current size then the file
      * is truncated, discarding any bytes beyond the new end of the file.  If
      * the given size is greater than or equal to the file's current size then
      * the file is not modified.  In either case, if this channel's file
@@ -506,16 +457,16 @@ public abstract class FileChannel
      * Forces any updates to this channel's file to be written to the storage
      * device that contains it.
      *
-     * <p> If this channel's file resides on a local storage device then when
+     * If this channel's file resides on a local storage device then when
      * this method returns it is guaranteed that all changes made to the file
      * since this channel was created, or since this method was last invoked,
      * will have been written to that device.  This is useful for ensuring that
      * critical information is not lost in the event of a system crash.
      *
-     * <p> If the file does not reside on a local device then no such guarantee
+     * If the file does not reside on a local device then no such guarantee
      * is made.
      *
-     * <p> The <tt>metaData</tt> parameter can be used to limit the number of
+     * The <tt>metaData</tt> parameter can be used to limit the number of
      * I/O operations that this method is required to perform.  Passing
      * <tt>false</tt> for this parameter indicates that only updates to the
      * file's content need be written to storage; passing <tt>true</tt>
@@ -524,17 +475,17 @@ public abstract class FileChannel
      * Whether this parameter actually has any effect is dependent upon the
      * underlying operating system and is therefore unspecified.
      *
-     * <p> Invoking this method may cause an I/O operation to occur even if the
+     * Invoking this method may cause an I/O operation to occur even if the
      * channel was only opened for reading.  Some operating systems, for
      * example, maintain a last-access time as part of a file's metadata, and
      * this time is updated whenever the file is read.  Whether or not this is
      * actually done is system-dependent and is therefore unspecified.
      *
-     * <p> This method is only guaranteed to force changes that were made to
+     * This method is only guaranteed to force changes that were made to
      * this channel's file via the methods defined in this class.  It may or
      * may not force changes that were made by modifying the content of a
-     * {@link MappedByteBuffer <i>mapped byte buffer</i>} obtained by
-     * invoking the {@link #map map} method.  Invoking the {@link
+     *  MappedByteBuffer mapped byte buffer} obtained by
+     * invoking the  #map map} method.  Invoking the 
      * MappedByteBuffer#force force} method of the mapped byte buffer will
      * force changes made to the buffer's content to be written.  </p>
      *
@@ -556,7 +507,7 @@ public abstract class FileChannel
      * Transfers bytes from this channel's file to the given writable byte
      * channel.
      *
-     * <p> An attempt is made to read up to <tt>count</tt> bytes starting at
+     * An attempt is made to read up to <tt>count</tt> bytes starting at
      * the given <tt>position</tt> in this channel's file and write them to the
      * target channel.  An invocation of this method may or may not transfer
      * all of the requested bytes; whether or not it does so depends upon the
@@ -566,13 +517,13 @@ public abstract class FileChannel
      * target channel is non-blocking and it has fewer than <tt>count</tt>
      * bytes free in its output buffer.
      *
-     * <p> This method does not modify this channel's position.  If the given
+     * This method does not modify this channel's position.  If the given
      * position is greater than the file's current size then no bytes are
      * transferred.  If the target channel has a position then bytes are
      * written starting at that position and then the position is incremented
      * by the number of bytes written.
      *
-     * <p> This method is potentially much more efficient than a simple loop
+     * This method is potentially much more efficient than a simple loop
      * that reads from this channel and writes to the target channel.  Many
      * operating systems can transfer bytes directly from the filesystem cache
      * to the target channel without actually copying them.  </p>
@@ -623,7 +574,7 @@ public abstract class FileChannel
      * Transfers bytes into this channel's file from the given readable byte
      * channel.
      *
-     * <p> An attempt is made to read up to <tt>count</tt> bytes from the
+     * An attempt is made to read up to <tt>count</tt> bytes from the
      * source channel and write them to this channel's file starting at the
      * given <tt>position</tt>.  An invocation of this method may or may not
      * transfer all of the requested bytes; whether or not it does so depends
@@ -633,13 +584,13 @@ public abstract class FileChannel
      * and has fewer than <tt>count</tt> bytes immediately available in its
      * input buffer.
      *
-     * <p> This method does not modify this channel's position.  If the given
+     * This method does not modify this channel's position.  If the given
      * position is greater than the file's current size then no bytes are
      * transferred.  If the source channel has a position then bytes are read
      * starting at that position and then the position is incremented by the
      * number of bytes read.
      *
-     * <p> This method is potentially much more efficient than a simple loop
+     * This method is potentially much more efficient than a simple loop
      * that reads from the source channel and writes to this channel.  Many
      * operating systems can transfer bytes directly from the source channel
      * into the filesystem cache without actually copying them.  </p>
@@ -690,7 +641,7 @@ public abstract class FileChannel
      * Reads a sequence of bytes from this channel into the given buffer,
      * starting at the given file position.
      *
-     * <p> This method works in the same manner as the {@link
+     * This method works in the same manner as the 
      * #read(ByteBuffer)} method, except that bytes are read starting at the
      * given file position rather than at the channel's current position.  This
      * method does not modify this channel's position.  If the given position
@@ -735,7 +686,7 @@ public abstract class FileChannel
      * Writes a sequence of bytes to this channel from the given buffer,
      * starting at the given file position.
      *
-     * <p> This method works in the same manner as the {@link
+     * This method works in the same manner as the 
      * #write(ByteBuffer)} method, except that bytes are written starting at
      * the given file position rather than at the channel's current position.
      * This method does not modify this channel's position.  If the given
@@ -826,43 +777,43 @@ public abstract class FileChannel
     /**
      * Maps a region of this channel's file directly into memory.
      *
-     * <p> A region of a file may be mapped into memory in one of three modes:
+     * A region of a file may be mapped into memory in one of three modes:
      * </p>
      *
      * <ul type=disc>
      *
-     *   <li><p> <i>Read-only:</i> Any attempt to modify the resulting buffer
-     *   will cause a {@link java.nio.ReadOnlyBufferException} to be thrown.
-     *   ({@link MapMode#READ_ONLY MapMode.READ_ONLY}) </p></li>
+     *   Read-only: Any attempt to modify the resulting buffer
+     *   will cause a  java.nio.ReadOnlyBufferException} to be thrown.
+     *   ( MapMode#READ_ONLY MapMode.READ_ONLY}) 
      *
-     *   <li><p> <i>Read/write:</i> Changes made to the resulting buffer will
+     *   Read/write: Changes made to the resulting buffer will
      *   eventually be propagated to the file; they may or may not be made
-     *   visible to other programs that have mapped the same file.  ({@link
-     *   MapMode#READ_WRITE MapMode.READ_WRITE}) </p></li>
+     *   visible to other programs that have mapped the same file.  (
+     *   MapMode#READ_WRITE MapMode.READ_WRITE}) 
      *
-     *   <li><p> <i>Private:</i> Changes made to the resulting buffer will not
+     *   Private: Changes made to the resulting buffer will not
      *   be propagated to the file and will not be visible to other programs
      *   that have mapped the same file; instead, they will cause private
-     *   copies of the modified portions of the buffer to be created.  ({@link
-     *   MapMode#PRIVATE MapMode.PRIVATE}) </p></li>
+     *   copies of the modified portions of the buffer to be created.  (
+     *   MapMode#PRIVATE MapMode.PRIVATE}) 
      *
-     * </ul>
+     * 
      *
-     * <p> For a read-only mapping, this channel must have been opened for
+     * For a read-only mapping, this channel must have been opened for
      * reading; for a read/write or private mapping, this channel must have
      * been opened for both reading and writing.
      *
-     * <p> The {@link MappedByteBuffer <i>mapped byte buffer</i>}
+     * The  MappedByteBuffer mapped byte buffer}
      * returned by this method will have a position of zero and a limit and
      * capacity of <tt>size</tt>; its mark will be undefined.  The buffer and
      * the mapping that it represents will remain valid until the buffer itself
      * is garbage-collected.
      *
-     * <p> A mapping, once established, is not dependent upon the file channel
+     * A mapping, once established, is not dependent upon the file channel
      * that was used to create it.  Closing the channel, in particular, has no
      * effect upon the validity of the mapping.
      *
-     * <p> Many of the details of memory-mapped files are inherently dependent
+     * Many of the details of memory-mapped files are inherently dependent
      * upon the underlying operating system and are therefore unspecified.  The
      * behavior of this method when the requested region is not completely
      * contained within this channel's file is unspecified.  Whether changes
@@ -870,16 +821,16 @@ public abstract class FileChannel
      * another, are propagated to the buffer is unspecified.  The rate at which
      * changes to the buffer are propagated to the file is unspecified.
      *
-     * <p> For most operating systems, mapping a file into memory is more
+     * For most operating systems, mapping a file into memory is more
      * expensive than reading or writing a few tens of kilobytes of data via
-     * the usual {@link #read read} and {@link #write write} methods.  From the
+     * the usual  #read read} and  #write write} methods.  From the
      * standpoint of performance it is generally only worth mapping relatively
      * large files into memory.  </p>
      *
      * @param  mode
-     *         One of the constants {@link MapMode#READ_ONLY READ_ONLY}, {@link
-     *         MapMode#READ_WRITE READ_WRITE}, or {@link MapMode#PRIVATE
-     *         PRIVATE} defined in the {@link MapMode} class, according to
+     *         One of the constants  MapMode#READ_ONLY READ_ONLY}, 
+     *         MapMode#READ_WRITE READ_WRITE}, or  MapMode#PRIVATE
+     *         PRIVATE} defined in the  MapMode} class, according to
      *         whether the file is to be mapped read-only, read/write, or
      *         privately (copy-on-write), respectively
      *
@@ -889,17 +840,17 @@ public abstract class FileChannel
      *
      * @param  size
      *         The size of the region to be mapped; must be non-negative and
-     *         no greater than {@link java.lang.Integer#MAX_VALUE}
+     *         no greater than  java.lang.Integer#MAX_VALUE}
      *
      * @return  The mapped byte buffer
      *
      * @throws NonReadableChannelException
-     *         If the <tt>mode</tt> is {@link MapMode#READ_ONLY READ_ONLY} but
+     *         If the <tt>mode</tt> is  MapMode#READ_ONLY READ_ONLY} but
      *         this channel was not opened for reading
      *
      * @throws NonWritableChannelException
-     *         If the <tt>mode</tt> is {@link MapMode#READ_WRITE READ_WRITE} or
-     *         {@link MapMode#PRIVATE PRIVATE} but this channel was not opened
+     *         If the <tt>mode</tt> is  MapMode#READ_WRITE READ_WRITE} or
+     *          MapMode#PRIVATE PRIVATE} but this channel was not opened
      *         for both reading and writing
      *
      * @throws IllegalArgumentException
@@ -921,21 +872,21 @@ public abstract class FileChannel
     /**
      * Acquires a lock on the given region of this channel's file.
      *
-     * <p> An invocation of this method will block until the region can be
+     * An invocation of this method will block until the region can be
      * locked, this channel is closed, or the invoking thread is interrupted,
      * whichever comes first.
      *
-     * <p> If this channel is closed by another thread during an invocation of
-     * this method then an {@link AsynchronousCloseException} will be thrown.
+     * If this channel is closed by another thread during an invocation of
+     * this method then an  AsynchronousCloseException} will be thrown.
      *
-     * <p> If the invoking thread is interrupted while waiting to acquire the
-     * lock then its interrupt status will be set and a {@link
+     * If the invoking thread is interrupted while waiting to acquire the
+     * lock then its interrupt status will be set and a 
      * FileLockInterruptionException} will be thrown.  If the invoker's
      * interrupt status is set when this method is invoked then that exception
      * will be thrown immediately; the thread's interrupt status will not be
      * changed.
      *
-     * <p> The region specified by the <tt>position</tt> and <tt>size</tt>
+     * The region specified by the <tt>position</tt> and <tt>size</tt>
      * parameters need not be contained within, or even overlap, the actual
      * underlying file.  Lock regions are fixed in size; if a locked region
      * initially contains the end of the file and the file grows beyond the
@@ -943,16 +894,16 @@ public abstract class FileChannel
      * If a file is expected to grow in size and a lock on the entire file is
      * required then a region starting at zero, and no smaller than the
      * expected maximum size of the file, should be locked.  The zero-argument
-     * {@link #lock()} method simply locks a region of size {@link
+     *  #lock()} method simply locks a region of size 
      * Long#MAX_VALUE}.
      *
-     * <p> Some operating systems do not support shared locks, in which case a
+     * Some operating systems do not support shared locks, in which case a
      * request for a shared lock is automatically converted into a request for
      * an exclusive lock.  Whether the newly-acquired lock is shared or
-     * exclusive may be tested by invoking the resulting lock object's {@link
+     * exclusive may be tested by invoking the resulting lock object's 
      * FileLock#isShared() isShared} method.
      *
-     * <p> File locks are held on behalf of the entire Java virtual machine.
+     * File locks are held on behalf of the entire Java virtual machine.
      * They are not suitable for controlling access to a file by multiple
      * threads within the same virtual machine.  </p>
      *
@@ -1013,11 +964,11 @@ public abstract class FileChannel
     /**
      * Acquires an exclusive lock on this channel's file.
      *
-     * <p> An invocation of this method of the form <tt>fc.lock()</tt> behaves
+     * An invocation of this method of the form <tt>fc.lock()</tt> behaves
      * in exactly the same way as the invocation
      *
      * <pre>
-     *     fc.{@link #lock(long,long,boolean) lock}(0L, Long.MAX_VALUE, false) </pre>
+     *     fc. #lock(long,long,boolean) lock}(0L, Long.MAX_VALUE, false) </pre>
      *
      * @return  A lock object representing the newly-acquired lock
      *
@@ -1055,14 +1006,14 @@ public abstract class FileChannel
     /**
      * Attempts to acquire a lock on the given region of this channel's file.
      *
-     * <p> This method does not block.  An invocation always returns
+     * This method does not block.  An invocation always returns
      * immediately, either having acquired a lock on the requested region or
      * having failed to do so.  If it fails to acquire a lock because an
      * overlapping lock is held by another program then it returns
      * <tt>null</tt>.  If it fails to acquire a lock for any other reason then
      * an appropriate exception is thrown.
      *
-     * <p> The region specified by the <tt>position</tt> and <tt>size</tt>
+     * The region specified by the <tt>position</tt> and <tt>size</tt>
      * parameters need not be contained within, or even overlap, the actual
      * underlying file.  Lock regions are fixed in size; if a locked region
      * initially contains the end of the file and the file grows beyond the
@@ -1070,16 +1021,16 @@ public abstract class FileChannel
      * If a file is expected to grow in size and a lock on the entire file is
      * required then a region starting at zero, and no smaller than the
      * expected maximum size of the file, should be locked.  The zero-argument
-     * {@link #tryLock()} method simply locks a region of size {@link
+     *  #tryLock()} method simply locks a region of size 
      * Long#MAX_VALUE}.
      *
-     * <p> Some operating systems do not support shared locks, in which case a
+     * Some operating systems do not support shared locks, in which case a
      * request for a shared lock is automatically converted into a request for
      * an exclusive lock.  Whether the newly-acquired lock is shared or
-     * exclusive may be tested by invoking the resulting lock object's {@link
+     * exclusive may be tested by invoking the resulting lock object's 
      * FileLock#isShared() isShared} method.
      *
-     * <p> File locks are held on behalf of the entire Java virtual machine.
+     * File locks are held on behalf of the entire Java virtual machine.
      * They are not suitable for controlling access to a file by multiple
      * threads within the same virtual machine.  </p>
      *
@@ -1124,11 +1075,11 @@ public abstract class FileChannel
     /**
      * Attempts to acquire an exclusive lock on this channel's file.
      *
-     * <p> An invocation of this method of the form <tt>fc.tryLock()</tt>
+     * An invocation of this method of the form <tt>fc.tryLock()</tt>
      * behaves in exactly the same way as the invocation
      *
      * <pre>
-     *     fc.{@link #tryLock(long,long,boolean) tryLock}(0L, Long.MAX_VALUE, false) </pre>
+     *     fc. #tryLock(long,long,boolean) tryLock}(0L, Long.MAX_VALUE, false) </pre>
      *
      * @return  A lock object representing the newly-acquired lock,
      *          or <tt>null</tt> if the lock could not be acquired

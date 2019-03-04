@@ -1,36 +1,8 @@
 /*
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
-/*
- *
- *
- *
- *
- *
+ * 
  * Written by Doug Lea with assistance from members of JCP JSR-166
- * Expert Group and released to the public domain, as explained at
- * http://creativecommons.org/publicdomain/zero/1.0/
+ * Expert Group and released to the public domain, as explained at http://creativecommons.org/publicdomain/zero/1.0/
  */
 
 package java.util.concurrent;
@@ -45,25 +17,14 @@ import java.security.AccessControlException;
 import sun.security.util.SecurityConstants;
 
 /**
- * Factory and utility methods for {@link Executor}, {@link
- * ExecutorService}, {@link ScheduledExecutorService}, {@link
- * ThreadFactory}, and {@link Callable} classes defined in this
- * package. This class supports the following kinds of methods:
+ * Factory and utility methods for Executor, ExecutorService, ScheduledExecutorService, ThreadFactory, and Callable classes defined in this package.
+ * This class supports the following kinds of methods:
  *
- * <ul>
- *   <li> Methods that create and return an {@link ExecutorService}
- *        set up with commonly useful configuration settings.
- *   <li> Methods that create and return a {@link ScheduledExecutorService}
- *        set up with commonly useful configuration settings.
- *   <li> Methods that create and return a "wrapped" ExecutorService, that
- *        disables reconfiguration by making implementation-specific methods
- *        inaccessible.
- *   <li> Methods that create and return a {@link ThreadFactory}
- *        that sets newly created threads to a known state.
- *   <li> Methods that create and return a {@link Callable}
- *        out of other closure-like forms, so they can be used
- *        in execution methods requiring <tt>Callable</tt>.
- * </ul>
+ * Methods that create and return an ExecutorService set up with commonly useful configuration settings.
+ * Methods that create and return a ScheduledExecutorService set up with commonly useful configuration settings.
+ * Methods that create and return a "wrapped" ExecutorService, that disables reconfiguration by making implementation-specific methods inaccessible.
+ * Methods that create and return a ThreadFactory that sets newly created threads to a known state.
+ * Methods that create and return a Callable out of other closure-like forms, so they can be used in execution methods requiring Callable.
  *
  * @since 1.5
  * @author Doug Lea
@@ -71,19 +32,15 @@ import sun.security.util.SecurityConstants;
 public class Executors {
 
     /**
-     * Creates a thread pool that reuses a fixed number of threads
-     * operating off a shared unbounded queue.  At any point, at most
-     * <tt>nThreads</tt> threads will be active processing tasks.
-     * If additional tasks are submitted when all threads are active,
-     * they will wait in the queue until a thread is available.
-     * If any thread terminates due to a failure during execution
-     * prior to shutdown, a new one will take its place if needed to
-     * execute subsequent tasks.  The threads in the pool will exist
-     * until it is explicitly {@link ExecutorService#shutdown shutdown}.
+     * Creates a thread pool that reuses a fixed number of threads operating off a shared unbounded queue. At any point, at most
+     * nThreads threads will be active processing tasks.
+     * If additional tasks are submitted when all threads are active, they will wait in the queue until a thread is available.
+     * If any thread terminates due to a failure during execution prior to shutdown, a new one will take its place if needed to
+     * execute subsequent tasks. The threads in the pool will exist until it is explicitly ExecutorService#shutdown shutdown.
      *
      * @param nThreads the number of threads in the pool
      * @return the newly created thread pool
-     * @throws IllegalArgumentException if {@code nThreads <= 0}
+     * @throws IllegalArgumentException if nThreads <= 0
      */
     public static ExecutorService newFixedThreadPool(int nThreads) {
         return new ThreadPoolExecutor(nThreads, nThreads,
@@ -95,14 +52,14 @@ public class Executors {
      * Creates a thread pool that reuses a fixed number of threads
      * operating off a shared unbounded queue, using the provided
      * ThreadFactory to create new threads when needed.  At any point,
-     * at most <tt>nThreads</tt> threads will be active processing
+     * at most nThreads threads will be active processing
      * tasks.  If additional tasks are submitted when all threads are
      * active, they will wait in the queue until a thread is
      * available.  If any thread terminates due to a failure during
      * execution prior to shutdown, a new one will take its place if
      * needed to execute subsequent tasks.  The threads in the pool will
-     * exist until it is explicitly {@link ExecutorService#shutdown
-     * shutdown}.
+     * exist until it is explicitly  ExecutorService#shutdown
+     * shutdown.
      *
      * @param nThreads the number of threads in the pool
      * @param threadFactory the factory to use when creating new threads
@@ -125,7 +82,7 @@ public class Executors {
      * subsequent tasks.)  Tasks are guaranteed to execute
      * sequentially, and no more than one task will be active at any
      * given time. Unlike the otherwise equivalent
-     * <tt>newFixedThreadPool(1)</tt> the returned executor is
+     * newFixedThreadPool(1) the returned executor is
      * guaranteed not to be reconfigurable to use additional threads.
      *
      * @return the newly created single-threaded Executor
@@ -141,7 +98,7 @@ public class Executors {
      * Creates an Executor that uses a single worker thread operating
      * off an unbounded queue, and uses the provided ThreadFactory to
      * create a new thread when needed. Unlike the otherwise
-     * equivalent <tt>newFixedThreadPool(1, threadFactory)</tt> the
+     * equivalent newFixedThreadPool(1, threadFactory) the
      * returned executor is guaranteed not to be reconfigurable to use
      * additional threads.
      *
@@ -164,14 +121,14 @@ public class Executors {
      * will reuse previously constructed threads when they are
      * available.  These pools will typically improve the performance
      * of programs that execute many short-lived asynchronous tasks.
-     * Calls to <tt>execute</tt> will reuse previously constructed
+     * Calls to execute will reuse previously constructed
      * threads if available. If no existing thread is available, a new
      * thread will be created and added to the pool. Threads that have
      * not been used for sixty seconds are terminated and removed from
      * the cache. Thus, a pool that remains idle for long enough will
      * not consume any resources. Note that pools with similar
      * properties but different details (for example, timeout parameters)
-     * may be created using {@link ThreadPoolExecutor} constructors.
+     * may be created using  ThreadPoolExecutor} constructors.
      *
      * @return the newly created thread pool
      */
@@ -206,7 +163,7 @@ public class Executors {
      * subsequent tasks.)  Tasks are guaranteed to execute
      * sequentially, and no more than one task will be active at any
      * given time. Unlike the otherwise equivalent
-     * <tt>newScheduledThreadPool(1)</tt> the returned executor is
+     * newScheduledThreadPool(1) the returned executor is
      * guaranteed not to be reconfigurable to use additional threads.
      * @return the newly created scheduled executor
      */
@@ -223,7 +180,7 @@ public class Executors {
      * place if needed to execute subsequent tasks.)  Tasks are
      * guaranteed to execute sequentially, and no more than one task
      * will be active at any given time. Unlike the otherwise
-     * equivalent <tt>newScheduledThreadPool(1, threadFactory)</tt>
+     * equivalent newScheduledThreadPool(1, threadFactory)
      * the returned executor is guaranteed not to be reconfigurable to
      * use additional threads.
      * @param threadFactory the factory to use when creating new
@@ -266,13 +223,13 @@ public class Executors {
 
 
     /**
-     * Returns an object that delegates all defined {@link
+     * Returns an object that delegates all defined 
      * ExecutorService} methods to the given executor, but not any
      * other methods that might otherwise be accessible using
      * casts. This provides a way to safely "freeze" configuration and
      * disallow tuning of a given concrete implementation.
      * @param executor the underlying implementation
-     * @return an <tt>ExecutorService</tt> instance
+     * @return an ExecutorService instance
      * @throws NullPointerException if executor null
      */
     public static ExecutorService unconfigurableExecutorService(ExecutorService executor) {
@@ -282,13 +239,13 @@ public class Executors {
     }
 
     /**
-     * Returns an object that delegates all defined {@link
+     * Returns an object that delegates all defined 
      * ScheduledExecutorService} methods to the given executor, but
      * not any other methods that might otherwise be accessible using
      * casts. This provides a way to safely "freeze" configuration and
      * disallow tuning of a given concrete implementation.
      * @param executor the underlying implementation
-     * @return a <tt>ScheduledExecutorService</tt> instance
+     * @return a ScheduledExecutorService instance
      * @throws NullPointerException if executor null
      */
     public static ScheduledExecutorService unconfigurableScheduledExecutorService(ScheduledExecutorService executor) {
@@ -300,14 +257,14 @@ public class Executors {
     /**
      * Returns a default thread factory used to create new threads.
      * This factory creates all new threads used by an Executor in the
-     * same {@link ThreadGroup}. If there is a {@link
-     * java.lang.SecurityManager}, it uses the group of {@link
+     * same  ThreadGroup}. If there is a 
+     * java.lang.SecurityManager}, it uses the group of 
      * System#getSecurityManager}, else the group of the thread
-     * invoking this <tt>defaultThreadFactory</tt> method. Each new
+     * invoking this defaultThreadFactory method. Each new
      * thread is created as a non-daemon thread with priority set to
-     * the smaller of <tt>Thread.NORM_PRIORITY</tt> and the maximum
+     * the smaller of Thread.NORM_PRIORITY and the maximum
      * priority permitted in the thread group.  New threads have names
-     * accessible via {@link Thread#getName} of
+     * accessible via  Thread#getName} of
      * <em>pool-N-thread-M</em>, where <em>N</em> is the sequence
      * number of this factory, and <em>M</em> is the sequence number
      * of the thread created by this factory.
@@ -320,24 +277,24 @@ public class Executors {
     /**
      * Returns a thread factory used to create new threads that
      * have the same permissions as the current thread.
-     * This factory creates threads with the same settings as {@link
+     * This factory creates threads with the same settings as 
      * Executors#defaultThreadFactory}, additionally setting the
      * AccessControlContext and contextClassLoader of new threads to
      * be the same as the thread invoking this
-     * <tt>privilegedThreadFactory</tt> method.  A new
-     * <tt>privilegedThreadFactory</tt> can be created within an
-     * {@link AccessController#doPrivileged} action setting the
+     * privilegedThreadFactory method.  A new
+     * privilegedThreadFactory can be created within an
+     *  AccessController#doPrivileged} action setting the
      * current thread's access control context to create threads with
      * the selected permission settings holding within that action.
      *
      * <p> Note that while tasks running within such threads will have
      * the same access control and class loader settings as the
-     * current thread, they need not have the same {@link
-     * java.lang.ThreadLocal} or {@link
+     * current thread, they need not have the same 
+     * java.lang.ThreadLocal} or 
      * java.lang.InheritableThreadLocal} values. If necessary,
      * particular values of thread locals can be set or reset before
-     * any task runs in {@link ThreadPoolExecutor} subclasses using
-     * {@link ThreadPoolExecutor#beforeExecute}. Also, if it is
+     * any task runs in  ThreadPoolExecutor} subclasses using
+     *  ThreadPoolExecutor#beforeExecute}. Also, if it is
      * necessary to initialize worker threads to have the same
      * InheritableThreadLocal settings as some other designated
      * thread, you can create a custom ThreadFactory in which that
@@ -354,10 +311,10 @@ public class Executors {
     }
 
     /**
-     * Returns a {@link Callable} object that, when
+     * Returns a  Callable} object that, when
      * called, runs the given task and returns the given result.  This
      * can be useful when applying methods requiring a
-     * <tt>Callable</tt> to an otherwise resultless action.
+     * Callable to an otherwise resultless action.
      * @param task the task to run
      * @param result the result to return
      * @return a callable object
@@ -370,8 +327,8 @@ public class Executors {
     }
 
     /**
-     * Returns a {@link Callable} object that, when
-     * called, runs the given task and returns <tt>null</tt>.
+     * Returns a  Callable} object that, when
+     * called, runs the given task and returns null.
      * @param task the task to run
      * @return a callable object
      * @throws NullPointerException if task null
@@ -383,7 +340,7 @@ public class Executors {
     }
 
     /**
-     * Returns a {@link Callable} object that, when
+     * Returns a  Callable} object that, when
      * called, runs the given privileged action and returns its result.
      * @param action the privileged action to run
      * @return a callable object
@@ -397,7 +354,7 @@ public class Executors {
     }
 
     /**
-     * Returns a {@link Callable} object that, when
+     * Returns a  Callable} object that, when
      * called, runs the given privileged exception action and returns
      * its result.
      * @param action the privileged exception action to run
@@ -412,13 +369,13 @@ public class Executors {
     }
 
     /**
-     * Returns a {@link Callable} object that will, when
-     * called, execute the given <tt>callable</tt> under the current
+     * Returns a  Callable} object that will, when
+     * called, execute the given callable under the current
      * access control context. This method should normally be
-     * invoked within an {@link AccessController#doPrivileged} action
+     * invoked within an  AccessController#doPrivileged} action
      * to create callables that will, if possible, execute under the
      * selected permission settings holding within that action; or if
-     * not possible, throw an associated {@link
+     * not possible, throw an associated 
      * AccessControlException}.
      * @param callable the underlying task
      * @return a callable object
@@ -432,14 +389,14 @@ public class Executors {
     }
 
     /**
-     * Returns a {@link Callable} object that will, when
-     * called, execute the given <tt>callable</tt> under the current
+     * Returns a  Callable} object that will, when
+     * called, execute the given callable under the current
      * access control context, with the current context class loader
      * as the context class loader. This method should normally be
-     * invoked within an {@link AccessController#doPrivileged} action
+     * invoked within an  AccessController#doPrivileged} action
      * to create callables that will, if possible, execute under the
      * selected permission settings holding within that action; or if
-     * not possible, throw an associated {@link
+     * not possible, throw an associated 
      * AccessControlException}.
      * @param callable the underlying task
      *

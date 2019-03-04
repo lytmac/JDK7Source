@@ -26,10 +26,10 @@
 package java.lang;
 
 /**
- * The <code>Runnable</code> interface should be implemented by any
+ * The Runnable interface should be implemented by any
  * class whose instances are intended to be executed by a thread. The
  * class must define a method of no arguments called <code>run</code>.
- * <p>
+ *
  * This interface is designed to provide a common protocol for objects that
  * wish to execute code while they are active. For example,
  * <code>Runnable</code> is implemented by class <code>Thread</code>.
@@ -52,16 +52,12 @@ package java.lang;
  * @see     java.util.concurrent.Callable
  * @since   JDK1.0
  */
-public
-interface Runnable {
+public interface Runnable {
     /**
-     * When an object implementing interface <code>Runnable</code> is used
-     * to create a thread, starting the thread causes the object's
-     * <code>run</code> method to be called in that separately executing
-     * thread.
-     * <p>
-     * The general contract of the method <code>run</code> is that it may
-     * take any action whatsoever.
+     * When an object implementing interface Runnable is used to create a thread, starting the thread causes the object's
+     * run method to be called in that separately executing thread.
+     *
+     * The general contract of the method run is that it may take any action whatsoever.
      *
      * @see     java.lang.Thread#run()
      */

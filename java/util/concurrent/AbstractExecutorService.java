@@ -1,36 +1,8 @@
 /*
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
-/*
- *
- *
- *
- *
- *
  * Written by Doug Lea with assistance from members of JCP JSR-166
- * Expert Group and released to the public domain, as explained at
- * http://creativecommons.org/publicdomain/zero/1.0/
+ * Expert Group and released to the public domain, as explained at http://creativecommons.org/publicdomain/zero/1.0/
  */
 
 package java.util.concurrent;
@@ -38,9 +10,9 @@ import java.util.*;
 
 /**
  * Provides default implementations of ExecutorService execution methods.
- * This class implements the submit, invokeAny and invokeAll methods using a RunnableFuture returned by newTaskFor,
- * which defaults to the FutureTask class provided in this package. For example, the implementation of submit(Runnable)
- * creates an associated RunnableFuture that is executed and returned.
+ * This class implements the submit, invokeAny and invokeAll methods using a RunnableFuture returned by newTaskFor, which defaults to the
+ * FutureTask class provided in this package. For example, the implementation of submit(Runnable) creates an associated RunnableFuture
+ * that is executed and returned.
  *
  * Subclasses may override the newTaskFor methods to return RunnableFuture implementations other than FutureTask.
  *

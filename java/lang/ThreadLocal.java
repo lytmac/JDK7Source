@@ -15,33 +15,33 @@ import java.util.concurrent.atomic.AtomicInteger;
  * This class provides thread-local variables.
  * These variables differ from their normal counterparts in that each thread that accesses one (via its get or set method)
  * has its own, independently initialized copy of the variable.
- * <p>
+ * 
  * ThreadLocal instances are typically private static fields in classes that wish to associate state with a thread (e.g., a user ID or Transaction ID).
- * <p>
+ * 
  * For example, the class below generates unique identifiers local to each thread.
  * A thread's id is assigned the first time it invokes ThreadId.get() and remains unchanged on subsequent calls.
- * <p>
- * import java.util.concurrent.atomic.AtomicInteger;
- * <p>
- * public class ThreadId {
- * // Atomic integer containing the next thread ID to be assigned(全局的，多个线程共享的变量。)
- * private static final AtomicInteger nextId = new AtomicInteger(0);
- * <p>
- * // Thread local variable containing each thread's ID
- * private static final ThreadLocal<Integer> threadId = new ThreadLocal<Integer>() {
- * Override
- * protected Integer initialValue() {
- * return nextId.getAndIncrement();
- * }
- * };
- * <p>
- * // Returns the current thread's unique ID, assigning it if necessary
- * public static int get() {
- * return threadId.get();
- * }
- * }
- * <p>
- * <p>
+ * 
+     * import java.util.concurrent.atomic.AtomicInteger;
+     *
+     * public class ThreadId {
+     *      // Atomic integer containing the next thread ID to be assigned(全局的，多个线程共享的变量。)
+     *      private static final AtomicInteger nextId = new AtomicInteger(0);
+     *
+     *      // Thread local variable containing each thread's ID
+     *      private static final ThreadLocal<Integer> threadId = new ThreadLocal<Integer>() {
+     *
+     *          Override
+     *          protected Integer initialValue() {
+     *              return nextId.getAndIncrement();
+     *          }
+     *      };
+     *
+     *      // Returns the current thread's unique ID, assigning it if necessary
+     *      public static int get() {
+     *          return threadId.get();
+     *      }
+     * }
+ *
  * 线程消失后，它的所有线程局部实例副本都要进行垃圾收集（除非存在对这些副本的其他引用）。
  * Each thread holds an implicit reference to its copy of a thread-local variable as long as the thread is alive and the ThreadLocal
  * instance is accessible; after a thread goes away, all of its copies of thread-local instances are subject to garbage collection
@@ -52,10 +52,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ThreadLocal<T> {
     /**
-     * 每个线程都维护了一个线性探测哈希表
+     * 每个线程都维护了一个线性探测哈希表(开放式探址法)
      * ThreadLocals rely on per-thread linear-probe hash maps attached to each thread (Thread.threadLocals and inheritableThreadLocals).
      * The ThreadLocal objects act as keys, searched via threadLocalHashCode.
-     * <p>
+     * 
      * This is a custom hash code (useful only within ThreadLocalMaps) that eliminates collisions in the common case where consecutively
      * constructed ThreadLocals are used by the same threads, while remaining well-behaved in less common cases.
      */
@@ -76,6 +76,7 @@ public class ThreadLocal<T> {
      * Returns the next hash code.
      */
     private static int nextHashCode() {
+        //每次向ThreadLocalMap中增加Entry，hashCode递增0x61c88647。这样能保证哈希码均匀的分布在2的N次方的数组里(神奇的数学)
         return nextHashCode.getAndAdd(HASH_INCREMENT);
     }
 
@@ -85,7 +86,7 @@ public class ThreadLocal<T> {
      * This method will be invoked the first time a thread accesses the variable with the get method, unless the thread previously invoked the set
      * method, in which case the initialValue method will not be invoked for the thread.
      * Normally, this method is invoked at most once per thread, but it may be invoked again in case of subsequent invocations of remove followed by get.
-     * <p>
+     * 
      * This implementation simply returns null; if the programmer desires thread-local variables to have an initial value other than null,
      * ThreadLocal must be subclassed, and this method overridden. Typically, an anonymous inner class will be used.
      *
@@ -209,7 +210,7 @@ public class ThreadLocal<T> {
      * ThreadLocalMap is a customized hash map suitable only for maintaining thread local values.
      * 对ThreadLocalMap的操作都封装在ThreadLocal内部。因为类是包私有的，所以允许在Thread内部声明字段
      * No operations are exported outside of the ThreadLocal class. The class is package private to allow declaration of fields in class Thread.
-     *
+     * 
      * To help deal with very large and long-lived usages, the hash table entries use WeakReferences for keys.
      * 由于未使用referenceQueue，过时条目只有在表开始空间不足时才能保证删除。
      * However, since reference queues are not used, stale entries are guaranteed to be removed only when the table starts running out of space.
@@ -239,7 +240,7 @@ public class ThreadLocal<T> {
         /**
          * The initial capacity -- MUST be a power of two.
          */
-        private static final int INITIAL_CAPACITY = 16;
+        private static final int INITIAL_CAPACITY = 16; // AKA: 2^4，必须是2的倍数
 
         /**
          * The table, resized as necessary. table.length MUST always be a power of two.
@@ -264,7 +265,7 @@ public class ThreadLocal<T> {
         }
 
         /**
-         * Increment i modulo len.
+         * Increment i modulo len. 下一个位置是计算位置的下一个，如果超过length了就从0重新开始
          */
         private static int nextIndex(int i, int len) {
             return ((i + 1 < len) ? i + 1 : 0);
@@ -327,7 +328,7 @@ public class ThreadLocal<T> {
          * @return the entry associated with key, or null if no such
          */
         private Entry getEntry(ThreadLocal key) {
-            int i = key.threadLocalHashCode & (table.length - 1); //HashMap的定位方式
+            int i = key.threadLocalHashCode & (table.length - 1); //计算未出现冲突的情况下，Entry应该在table数组中的位置
             Entry e = table[i];
             if (e != null && e.get() == key)
                 return e;
@@ -348,11 +349,14 @@ public class ThreadLocal<T> {
             Entry[] tab = table;
             int len = tab.length;
 
-            while (e != null) { //遍历hashMap的单个slot链表
+            /**
+             * 通过计算的位置下标去找Entry,未匹配上则下标加1继续匹配。
+             */
+            while (e != null) {
                 ThreadLocal k = e.get();
                 if (k == key)
                     return e;
-                if (k == null)
+                if (k == null) //在遍历的途中可能扫到已经已经被GC掉的Entry
                     expungeStaleEntry(i);
                 else
                     i = nextIndex(i, len);
@@ -378,9 +382,7 @@ public class ThreadLocal<T> {
             int len = tab.length;
             int i = key.threadLocalHashCode & (len - 1);
 
-            for (Entry e = tab[i];
-                 e != null;
-                 e = tab[i = nextIndex(i, len)]) {
+            for (Entry e = tab[i]; e != null; e = tab[i = nextIndex(i, len)]) {
                 ThreadLocal k = e.get();
 
                 if (k == key) {
@@ -419,9 +421,10 @@ public class ThreadLocal<T> {
         }
 
         /**
+         * 移除过期的Entry(也就是已经被GC回收的Entry)。
          * Replace a stale entry encountered during a set operation with an entry for the specified key.
          * The value passed in the value parameter is stored in the entry, whether or not an entry already exists for the specified key.
-         * <p>
+         * 
          * As a side effect, this method expunges all stale entries in the "run" containing the stale entry.
          * (A run is a sequence of entries between two null slots.)
          *
@@ -429,8 +432,7 @@ public class ThreadLocal<T> {
          * @param value     the value to be associated with key
          * @param staleSlot index of the first stale entry encountered while searching for key.
          */
-        private void replaceStaleEntry(ThreadLocal key, Object value,
-                                       int staleSlot) {
+        private void replaceStaleEntry(ThreadLocal key, Object value, int staleSlot) {
             Entry[] tab = table;
             int len = tab.length;
             Entry e;
@@ -555,7 +557,7 @@ public class ThreadLocal<T> {
          * Re-pack and/or re-size the table. First scan the entire table removing stale entries. If this doesn't sufficiently shrink the size of the table, double the table size.
          */
         private void rehash() {
-            expungeStaleEntries();
+            expungeStaleEntries(); //先清理掉所有已经被GC回收掉的Entry
 
             // Use lower threshold for doubling to avoid hysteresis
             if (size >= threshold - threshold / 4)

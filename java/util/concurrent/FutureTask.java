@@ -1,36 +1,8 @@
 /*
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
-/*
- *
- *
- *
- *
- *
  * Written by Doug Lea with assistance from members of JCP JSR-166
- * Expert Group and released to the public domain, as explained at
- * http://creativecommons.org/publicdomain/zero/1.0/
+ * Expert Group and released to the public domain, as explained at http://creativecommons.org/publicdomain/zero/1.0/
  */
 
 package java.util.concurrent;
@@ -38,15 +10,16 @@ package java.util.concurrent;
 import java.util.concurrent.locks.LockSupport;
 
 /**
- * A cancellable asynchronous computation.
- * This class provides a base implementation of Future, with methods to start and cancel a computation,
+ * A cancellable asynchronous computation. 可取消的异步计算任务
+ * This class provides a base implementation of Future, with methods to start and cancel a computation, uery to see if the computation is complete,
  * query to see if the computation is complete, and retrieve the result of the computation.
  *
+ * 计算结果只会在计算任务完成后才能被获取，在未完成前获取计算结果将被阻塞。
  * The result can only be retrieved when the computation has completed; the get methods will block if the computation has not yet completed.
  * Once the computation has completed, the computation cannot be restarted or cancelled (unless the computation is invoked using runAndReset).
  *
- * A FutureTask can be used to wrap a Callable or Runnable object.
- * Because FutureTask implements Runnable, a FutureTask can be submitted to an Executor for execution.
+ * A FutureTask can be used to wrap a Callable or Runnable object. Because FutureTask implements Runnable, a FutureTask can be submitted to an
+ * Executor for execution.
  *
  * In addition to serving as a standalone class, this class provides protected functionality that may be useful when creating customized task classes.
  *
@@ -81,13 +54,13 @@ public class FutureTask<V> implements RunnableFuture<V> {
      */
 
     private volatile int state;
-    private static final int NEW = 0;  //任务未执行
-    private static final int COMPLETING = 1;  //任务进行(瞬时状态)
-    private static final int NORMAL = 2;  //任务正常完成
-    private static final int EXCEPTIONAL = 3;  //任务抛出异常
-    private static final int CANCELLED = 4;  //任务被取消
+    private static final int NEW = 0;           //任务未执行
+    private static final int COMPLETING = 1;    //任务进行(瞬时状态)
+    private static final int NORMAL = 2;        //任务正常完成
+    private static final int EXCEPTIONAL = 3;   //任务抛出异常
+    private static final int CANCELLED = 4;     //任务被取消
     private static final int INTERRUPTING = 5;  //任务中断(瞬时状态)
-    private static final int INTERRUPTED = 6;  //任务已中断
+    private static final int INTERRUPTED = 6;   //任务已中断
 
     /**
      * The underlying callable; nulled out after running
@@ -95,6 +68,7 @@ public class FutureTask<V> implements RunnableFuture<V> {
     private Callable<V> callable;
     /**
      * The result to return or exception to throw from get()
+     * 任务计算返回的结果，无需volatile修饰???
      */
     private Object outcome; // non-volatile, protected by state reads/writes
     /**
@@ -135,10 +109,12 @@ public class FutureTask<V> implements RunnableFuture<V> {
     }
 
     /**
-     * Creates a FutureTask that will, upon running, execute the given Runnable, and arrange that get will return the given result on successful completion.
+     * Creates a FutureTask that will, upon running, execute the given Runnable, and arrange that get will return the given result on
+     * successful completion.
      *
      * @param runnable the runnable task
-     * @param result   the result to return on successful completion. If you don't need a particular result, consider using constructions of the form: Future<?> f = new FutureTask<Void>(runnable, null)}
+     * @param result   the result to return on successful completion. If you don't need a particular result, consider using constructions
+     *                 of the form: Future<?> f = new FutureTask<Void>(runnable, null)}
      * @throws NullPointerException if the runnable is null
      */
     public FutureTask(Runnable runnable, V result) {
@@ -152,6 +128,10 @@ public class FutureTask<V> implements RunnableFuture<V> {
 
     public boolean isDone() {
         //任务从状态NEW转变为其他状态，都是发生在计算执行完，将结果赋值到outcome的时间点。
+
+        /**
+         * 这里还是很值得玩味的：状态只要不是NEW了，就意味着get()将不再处于阻塞状态了。要么正常返回结果，要么抛出异常。所以判断任务是否已经Done，应该按照这个依据
+         */
         return state != NEW;
     }
 
@@ -196,7 +176,7 @@ public class FutureTask<V> implements RunnableFuture<V> {
      */
     public V get() throws InterruptedException, ExecutionException {
         int s = state;
-        if (s <= COMPLETING)
+        if (s <= COMPLETING) //如果任务运行的状态不是已完成，则会产生阻塞
             s = awaitDone(false, 0L);
         return report(s);
     }

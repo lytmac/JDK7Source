@@ -12,7 +12,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.*;
 
 /**
- * An ExecutorService that executes each submitted task using one of possibly several pooled threads, normally configured using Executors factory methods.
+ * An ExecutorService that executes each submitted task using one of possibly several pooled threads, normally configured using Executors
+ * factory methods.
  *
  * Thread pools address two different problems: they usually provide improved performance when executing large numbers of asynchronous tasks,
  * due to reduced per-task invocation overhead, and they provide a means of bounding and managing the resources, including threads,
@@ -79,29 +80,29 @@ import java.util.*;
  * Using an unbounded queue (for example a LinkedBlockingQueue without a predefined capacity) will cause new tasks to wait in the queue when all
  * corePoolSize threads are busy. Thus, no more than corePoolSize threads will ever be created. (And the value of the maximumPoolSize therefore
  * doesn't have any effect.)  This may be appropriate when each task is completely independent of others, so tasks cannot affect each others execution;
- * for example, in a web page server. While this style of queuing can be useful in smoothing out transient bursts of requests, it admits the possibility
- * of unbounded work queue growth when commands continue to arrive on average faster than they can be processed.
+ * for example, in a web page server. While this style of queuing can be useful in smoothing out transient bursts of requests, it admits the
+ * possibility of unbounded work queue growth when commands continue to arrive on average faster than they can be processed.
  * Bounded queues.
- * A bounded queue (for example, an ArrayBlockingQueue) helps prevent resource exhaustion when used with finite maximumPoolSizes, but can be more difficult to
- * tune and control. Queue sizes and maximum pool sizes may be traded off for each other: Using large queues and small pools minimizes CPU usage, OS resources,
- * and context-switching overhead, but can lead to artificially low throughput.  If tasks frequently block (for example if they are I/O bound), a system may be
- * able to schedule time for more threads than you otherwise allow. Use of small queues generally requires larger pool sizes, which keeps CPUs busier but
- * may encounter unacceptable scheduling overhead, which also decreases throughput.
+ * A bounded queue (for example, an ArrayBlockingQueue) helps prevent resource exhaustion when used with finite maximumPoolSizes, but can be more
+ * difficult to tune and control. Queue sizes and maximum pool sizes may be traded off for each other: Using large queues and small pools minimizes
+ * CPU usage, OS resources, and context-switching overhead, but can lead to artificially low throughput.  If tasks frequently block (for example if
+ * they are I/O bound), a system may be able to schedule time for more threads than you otherwise allow. Use of small queues generally requires
+ * larger pool sizes, which keeps CPUs busier but may encounter unacceptable scheduling overhead, which also decreases throughput.
  *
  * Rejected tasks
- * New tasks submitted in method execute will be rejected when the Executor has been shut down, and also when the Executor uses finite bounds for both maximum
- * threads and work queue capacity, and is saturated. In either case, the execute method invokes the RejectedExecutionHandler.rejectedExecution() method of its
- * RejectedExecutionHandler. Four predefined handler policies are provided:
+ * New tasks submitted in method execute will be rejected when the Executor has been shut down, and also when the Executor uses finite bounds for both
+ * maximum threads and work queue capacity, and is saturated. In either case, the execute method invokes the RejectedExecutionHandler.rejectedExecution()
+ * method of its RejectedExecutionHandler. Four predefined handler policies are provided:
  * 默认的拒绝策略是抛出 RejectedExecutionException 异常。
  * In the default ThreadPoolExecutor.AbortPolicy, the handler throws a runtime RejectedExecutionException upon rejection.
- * In ThreadPoolExecutor.CallerRunsPolicy, the thread that invokes execute itself runs the task. This provides a simple feedback control mechanism that will
- * slow down the rate that new tasks are submitted.
+ * In ThreadPoolExecutor.CallerRunsPolicy, the thread that invokes execute itself runs the task. This provides a simple feedback control mechanism that
+ * will slow down the rate that new tasks are submitted.
  * In ThreadPoolExecutor.DiscardPolicy, a task that cannot be executed is simply dropped.
- * In ThreadPoolExecutor.DiscardOldestPolicy, if the executor is not shut down, the task at the head of the work queue is dropped, and then execution is retried
- * (which can fail again, causing this to be repeated.)
+ * In ThreadPoolExecutor.DiscardOldestPolicy, if the executor is not shut down, the task at the head of the work queue is dropped, and then execution
+ * is retried(which can fail again, causing this to be repeated.)
  *
- * It is possible to define and use other kinds of RejectedExecutionHandler} classes. Doing so requires some care especially when policies are designed to work
- * only under particular capacity or queuing policies.
+ * It is possible to define and use other kinds of RejectedExecutionHandler} classes. Doing so requires some care especially when policies are designed
+ * to work only under particular capacity or queuing policies.
  *
  * Hook methods
  * 继承 ThreadPoolExecutor 类，重写 beforeExecute() and afterExecute() 方法用于在任务运行前和运行后执行一些操作。
@@ -112,16 +113,18 @@ import java.util.*;
  * If hook or callback methods throw exceptions, internal worker threads may in turn fail and abruptly terminate.
  *
  * Queue maintenance
- * Method getQueue allows access to the work queue for purposes of monitoring and debugging. Use of this method for any other purpose is strongly discouraged.
- * Two supplied methods, remove} and purge are available to assist in storage reclamation when large numbers of queued tasks become cancelled.
+ * Method getQueue allows access to the work queue for purposes of monitoring and debugging. Use of this method for any other purpose is strongly
+ * discouraged. Two supplied methods, remove and purge are available to assist in storage reclamation when large numbers of queued tasks become
+ * cancelled.
  *
  * Finalization
- * A pool that is no longer referenced in a program AND has no remaining threads will be shutdown automatically. If you would like to ensure that unreferenced
- * pools are reclaimed even if users forget to call shutdown, then you must arrange that unused threads eventually die, by setting appropriate keep-alive times,
- * using a lower bound of zero core threads and/or setting allowCoreThreadTimeOut(boolean).
+ * A pool that is no longer referenced in a program AND has no remaining threads will be shutdown automatically. If you would like to ensure that
+ * unreferenced pools are reclaimed even if users forget to call shutdown, then you must arrange that unused threads eventually die, by setting
+ * appropriate keep-alive times, using a lower bound of zero core threads and/or setting allowCoreThreadTimeOut(boolean).
  *
  * Extension example.
- * Most extensions of this class override one or more of the protected hook methods. For example, here is a subclass that adds a simple pause/resume feature:
+ * Most extensions of this class override one or more of the protected hook methods. For example, here is a subclass that adds a simple pause/resume
+ * feature:
  *
      * class PausableThreadPoolExecutor extends ThreadPoolExecutor {
      *      private boolean isPaused;
@@ -174,9 +177,9 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * workerCount, indicating the effective number of threads
      * runState, indicating whether running, shutting down etc
      *
-     * In order to pack them into one int, we limit workerCount to (2^29)-1 (about 500 million) threads rather than (2^31)-1 (2billion) otherwise representable.
-     * If this is ever an issue in the future, the variable can be changed to be an AtomicLong, and the shift/mask constants below adjusted.
-     * But until the need arises, this code is a bit faster and simpler using an int (是否是因为int是32位，无需考虑并发问题).
+     * In order to pack them into one int, we limit workerCount to (2^29)-1 (about 500 million) threads rather than (2^31)-1 (2billion) otherwise
+     * representable. If this is ever an issue in the future, the variable can be changed to be an AtomicLong, and the shift/mask constants below
+     * adjusted. But until the need arises, this code is a bit faster and simpler using an int (是否是因为int是32位，无需考虑并发问题).
      *
      * workerCount 是运行启动但是不允许终止的线程数量。这个数值在某一瞬间并不等同于实际存活的线程。
      * The workerCount is the number of workers that have been permitted to start and not permitted to stop. The value may be transiently different
@@ -192,8 +195,8 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      *   TIDYING:  All tasks have terminated, workerCount is zero, the thread transitioning to state TIDYING will run the terminated() hook method
      *   TERMINATED: terminated() has completed
      *
-     * The numerical order among these values matters, to allow ordered comparisons. The runState monotonically increases over time, but need not hit each state.
-     * The transitions are:
+     * The numerical order among these values matters, to allow ordered comparisons. The runState monotonically increases over time, but need not hit
+     * each state. The transitions are:
      *
      * RUNNING -> SHUTDOWN
      *    On invocation of shutdown(), perhaps implicitly in finalize()
@@ -260,45 +263,33 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
     }
 
     /**
-     * Decrements the workerCount field of ctl. This is called only on
-     * abrupt termination of a thread (see processWorkerExit). Other
-     * decrements are performed within getTask.
+     * Decrements the workerCount field of ctl. This is called only on abrupt termination of a thread (see processWorkerExit). Other decrements
+     * are performed within getTask.
      */
     private void decrementWorkerCount() {
         do {} while (! compareAndDecrementWorkerCount(ctl.get()));
     }
 
     /**
-     * The queue used for holding tasks and handing off to worker
-     * threads.  We do not require that workQueue.poll() returning
-     * null necessarily means that workQueue.isEmpty(), so rely
-     * solely on isEmpty to see if the queue is empty (which we must
-     * do for example when deciding whether to transition from
-     * SHUTDOWN to TIDYING).  This accommodates special-purpose
-     * queues such as DelayQueues for which poll() is allowed to
-     * return null even if it may later return non-null when delays
-     * expire.
+     * The queue used for holding tasks and handing off to worker threads.
+     * We do not require that workQueue.poll() returning null necessarily means that workQueue.isEmpty(), so rely solely on isEmpty to see if the
+     * queue is empty (which we must do for example when deciding whether to transition from SHUTDOWN to TIDYING). This accommodates special-purpose
+     * queues such as DelayQueues for which poll() is allowed to return null even if it may later return non-null when delays expire.
      */
     private final BlockingQueue<Runnable> workQueue;
 
     /**
      * Lock held on access to workers set and related bookkeeping.
-     * While we could use a concurrent set of some sort, it turns out
-     * to be generally preferable to use a lock. Among the reasons is
-     * that this serializes interruptIdleWorkers, which avoids
-     * unnecessary interrupt storms, especially during shutdown.
-     * Otherwise exiting threads would concurrently interrupt those
-     * that have not yet interrupted. It also simplifies some of the
-     * associated statistics bookkeeping of largestPoolSize etc. We
-     * also hold mainLock on shutdown and shutdownNow, for the sake of
-     * ensuring workers set is stable while separately checking
-     * permission to interrupt and actually interrupting.
+     * While we could use a concurrent set of some sort, it turns out to be generally preferable to use a lock. Among the reasons is that this
+     * serializes interruptIdleWorkers, which avoids unnecessary interrupt storms, especially during shutdown.
+     * Otherwise exiting threads would concurrently interrupt those that have not yet interrupted. It also simplifies some of the associated
+     * statistics bookkeeping of largestPoolSize etc. We also hold mainLock on shutdown and shutdownNow, for the sake of ensuring workers set
+     * is stable while separately checking permission to interrupt and actually interrupting.
      */
     private final ReentrantLock mainLock = new ReentrantLock();
 
     /**
-     * Set containing all worker threads in pool. Accessed only when
-     * holding mainLock.
+     * Set containing all worker threads in pool. Accessed only when holding mainLock.
      */
     private final HashSet<Worker> workers = new HashSet<Worker>();
 
@@ -308,14 +299,12 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
     private final Condition termination = mainLock.newCondition();
 
     /**
-     * Tracks largest attained pool size. Accessed only under
-     * mainLock.
+     * Tracks largest attained pool size. Accessed only under mainLock.
      */
     private int largestPoolSize;
 
     /**
-     * Counter for completed tasks. Updated only on termination of
-     * worker threads. Accessed only under mainLock.
+     * Counter for completed tasks. Updated only on termination of worker threads. Accessed only under mainLock.
      */
     private long completedTaskCount;
 
@@ -366,15 +355,13 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
     private volatile boolean allowCoreThreadTimeOut;
 
     /**
-     * Core pool size is the minimum number of workers to keep alive
-     * (and not allow to time out etc) unless allowCoreThreadTimeOut
-     * is set, in which case the minimum is zero.
+     * Core pool size is the minimum number of workers to keep alive (and not allow to time out etc) unless allowCoreThreadTimeOut is set,
+     * in which case the minimum is zero.
      */
     private volatile int corePoolSize;
 
     /**
-     * Maximum pool size. Note that the actual maximum is internally
-     * bounded by CAPACITY.
+     * Maximum pool size. Note that the actual maximum is internally bounded by CAPACITY.
      */
     private volatile int maximumPoolSize;
 
@@ -404,8 +391,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * and failure to actually interrupt will merely delay response to
      * configuration changes so is not handled exceptionally.
      */
-    private static final RuntimePermission shutdownPerm =
-        new RuntimePermission("modifyThread");
+    private static final RuntimePermission shutdownPerm = new RuntimePermission("modifyThread");
 
     /**
      * Class Worker mainly maintains interrupt control state for
@@ -423,10 +409,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * state to a negative value, and clear it upon start (in
      * runWorker).
      */
-    private final class Worker
-        extends AbstractQueuedSynchronizer
-        implements Runnable
-    {
+    private final class Worker extends AbstractQueuedSynchronizer implements Runnable {
         /**
          * This class will never be serialized, but we provide a
          * serialVersionUID to suppress a javac warning.

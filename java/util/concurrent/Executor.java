@@ -9,8 +9,10 @@ package java.util.concurrent;
 
 /**
  * An object that executes submitted Runnable tasks.
- * This interface provides a way of decoupling task submission from the mechanics of how each task will be run, including details of thread use, scheduling, etc.
- * An Executor is normally used instead of explicitly creating threads.
+ *
+ * 该类提供了一种在任务的提交和运行(线程的使用及调度)之间进行解耦的方式。
+ * This interface provides a way of decoupling task submission from the mechanics of how each task will be run, including details of thread use,
+ * scheduling, etc. An Executor is normally used instead of explicitly creating threads.
  * For example, rather than invoking new Thread(new(RunnableTask())).start() for each of a set of tasks, you might use:
  *
      * Executor executor = new Executor();
@@ -19,7 +21,8 @@ package java.util.concurrent;
      * ...
  *
  * Executor 接口并没有严格地要求执行是异步的.简单地在调用者线程中运行任务也是允许的
- * However, the Executor interface does not strictly require that execution be asynchronous. In the simplest case, an executor can run the submitted task immediately in the caller's thread:
+ * However, the Executor interface does not strictly require that execution be asynchronous. In the simplest case, an executor can run the
+ * submitted task immediately in the caller's thread:
  *
      * class DirectExecutor implements Executor {
      *       public void execute(Runnable r) {
@@ -71,8 +74,9 @@ package java.util.concurrent;
  * The ThreadPoolExecutor class provides an extensible thread pool implementation.
  * The Executors class provides convenient factory methods for these Executors.
  *
- * 内存一致性效果：线程中将 Runnable 对象提交到 Executor 之前的操作 happen-before 其执行开始。尽管 Runnaeble 对象代表的任务可能在另一个线程中执行。
- * Memory consistency effects: Actions in a thread prior to submitting a Runnable object to an Executor happen-before its execution begins, perhaps in another thread.
+ * 内存一致性效果：线程中将Runnable对象提交到Executor之前的操作happen-before其执行开始。尽管Runnable对象代表的任务可能在另一个线程中执行。
+ * Memory consistency effects: Actions in a thread prior to submitting a Runnable object to an Executor happen-before its execution begins,
+ * perhaps in another thread.
  *
  * @since 1.5
  * @author Doug Lea
@@ -80,13 +84,11 @@ package java.util.concurrent;
 public interface Executor {
 
     /**
-     * Executes the given command at some time in the future.  The command
-     * may execute in a new thread, in a pooled thread, or in the calling
-     * thread, at the discretion of the <tt>Executor</tt> implementation.
+     * Executes the given command at some time in the future. The command may execute in a new thread, in a pooled thread, or in the calling
+     * thread, at the discretion of the Executor implementation.
      *
      * @param command the runnable task
-     * @throws RejectedExecutionException if this task cannot be
-     * accepted for execution.
+     * @throws RejectedExecutionException if this task cannot be accepted for execution.
      * @throws NullPointerException if command is null
      */
     void execute(Runnable command);

@@ -15,7 +15,7 @@ package java.util.concurrent;
  * @see Executor
  * @since 1.6
  * @author Doug Lea
- * @param <V> The result type returned by this Future's <tt>get</tt> method
+ * @param <V> The result type returned by this Future's get method
  */
 public interface RunnableFuture<V> extends Runnable, Future<V> {
     /**

@@ -1,36 +1,8 @@
 /*
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
-
-/*
- *
- *
- *
- *
- *
  * Written by Doug Lea with assistance from members of JCP JSR-166
- * Expert Group and released to the public domain, as explained at
- * http://creativecommons.org/publicdomain/zero/1.0/
+ * Expert Group and released to the public domain, as explained at http://creativecommons.org/publicdomain/zero/1.0/
  */
 
 package java.util.concurrent;
@@ -40,14 +12,14 @@ package java.util.concurrent;
  * Methods are provided to check if the computation is complete, to wait for its completion, and to retrieve the result of the computation.
  *
  * 只能通过Future.get()获取计算结果，在未就绪前会一直阻塞。
- * The result can only be retrieved using method get when the computation has completed, blocking if  necessary until it is ready.
+ * The result can only be retrieved using method get when the computation has completed, blocking if necessary until it is ready.
  *
  * 一旦任务已经完成，任务就不能被取消了
  * Cancellation is performed by the cancel method. Additional methods are provided to determine if the task completed normally or was cancelled.
  * Once a computation has completed, the computation cannot be cancelled.
  *
- * If you would like to use a Future for the sake of cancellability but not provide a usable result, you can
- * declare types of the form  Future<?> and return null as a result of the underlying task.
+ * If you would like to use a Future for the sake of cancellability but not provide a usable result, you can declare types of the
+ * form Future<?> and return null as a result of the underlying task.
  *
  * Sample Usage (Note that the following classes are all made-up.)
  *
@@ -84,7 +56,7 @@ package java.util.concurrent;
      *      }});
      * executor.execute(future);
  *
- * 内存一致性效果：一个线程调用Future.get()，则该Future对象代表的所有异步计算行为发生在该调用之前
+ * 内存一致性效果：一个线程调用Future.get()，则该Future对象代表的所有异步计算行为发生在该调用之前。也就是说计算的中间结果是不可见的。
  * Memory consistency effects: Actions taken by the asynchronous computation happen-before actions following the corresponding Future.get() in another thread.
  *
  * @see FutureTask

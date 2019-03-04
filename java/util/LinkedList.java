@@ -1,75 +1,37 @@
 /*
  * Copyright (c) 1997, 2011, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
  */
 
 package java.util;
 
 /**
- * Doubly-linked list implementation of the {@code List} and {@code Deque}
- * interfaces.  Implements all optional list operations, and permits all
- * elements (including {@code null}).
+ * Doubly-linked list implementation of the List and Deque interfaces.
+ * Implements all optional list operations, and permits all elements including null(支持NULL元素插入).
  *
- * <p>All of the operations perform as could be expected for a doubly-linked
- * list.  Operations that index into the list will traverse the list from
+ * All of the operations perform as could be expected for a doubly-linked list. Operations that index into the list will traverse the list from
  * the beginning or the end, whichever is closer to the specified index.
  *
- * <p><strong>Note that this implementation is not synchronized.</strong>
- * If multiple threads access a linked list concurrently, and at least
- * one of the threads modifies the list structurally, it <i>must</i> be
- * synchronized externally.  (A structural modification is any operation
- * that adds or deletes one or more elements; merely setting the value of
- * an element is not a structural modification.)  This is typically
- * accomplished by synchronizing on some object that naturally
- * encapsulates the list.
+ * 这个实现版本的操作没有做同步，如果多个线程同时访问一个链接列表，而其中至少一个线程从结构上修改了该列表，则它必须 保持外部同步
+ * Note that this implementation is not synchronized.
+ * If multiple threads access a linked list concurrently, and at least one of the threads modifies the list structurally, it must be synchronized externally.
+ * (A structural modification is any operation that adds or deletes one or more elements; merely setting the value of an element is not a structural modification.)
+ * This is typically accomplished by synchronizing on some object that naturally encapsulates the list.
  *
- * If no such object exists, the list should be "wrapped" using the
- * {@link Collections#synchronizedList Collections.synchronizedList}
- * method.  This is best done at creation time, to prevent accidental
- * unsynchronized access to the list:<pre>
- *   List list = Collections.synchronizedList(new LinkedList(...));</pre>
- *
- * <p>The iterators returned by this class's {@code iterator} and
- * {@code listIterator} methods are <i>fail-fast</i>: if the list is
- * structurally modified at any time after the iterator is created, in
- * any way except through the Iterator's own {@code remove} or
- * {@code add} methods, the iterator will throw a {@link
- * ConcurrentModificationException}.  Thus, in the face of concurrent
- * modification, the iterator fails quickly and cleanly, rather than
- * risking arbitrary, non-deterministic behavior at an undetermined
+ * If no such object exists, the list should be "wrapped" using the Collections.synchronizedList method. This is best done at creation time, to prevent accidental
+ * unsynchronized access to the list: List list = Collections.synchronizedList(new LinkedList(...));
+ * The iterators returned by this class's iterator and listIterator methods are fail-fast: if the list is structurally modified at any time after the iterator is
+ * created, in any way except through the Iterator's own remove or add methods, the iterator will throw a ConcurrentModificationException.
+ * Collections.synchronizedList()在并发修改的场景下，iterator会快速失败,而不会冒将来不确定的时间任意发生不确定行为的风险
+ * Thus, in the face of concurrent modification, the iterator fails quickly and cleanly, rather than risking arbitrary, non-deterministic behavior at an undetermined
  * time in the future.
  *
- * <p>Note that the fail-fast behavior of an iterator cannot be guaranteed
- * as it is, generally speaking, impossible to make any hard guarantees in the
- * presence of unsynchronized concurrent modification.  Fail-fast iterators
- * throw {@code ConcurrentModificationException} on a best-effort basis.
- * Therefore, it would be wrong to write a program that depended on this
- * exception for its correctness:   <i>the fail-fast behavior of iterators
- * should be used only to detect bugs.</i>
+ * Note that the fail-fast behavior of an iterator cannot be guaranteed as it is, generally speaking, impossible to make any hard guarantees in the
+ * presence of unsynchronized concurrent modification. Fail-fast iterators throw ConcurrentModificationException on a best-effort basis.
+ * Therefore, it would be wrong to write a program that depended on this exception for its correctness:
+ * the fail-fast behavior of iterators should be used only to detect bugs.
  *
- * <p>This class is a member of the
- * <a href="{@docRoot}/../technotes/guides/collections/index.html">
- * Java Collections Framework</a>.
+ * This class is a member of the Java Collections Framework.
  *
  * @author  Josh Bloch
  * @see     List
@@ -78,23 +40,19 @@ package java.util;
  * @param <E> the type of elements held in this collection
  */
 
-public class LinkedList<E>
-    extends AbstractSequentialList<E>
-    implements List<E>, Deque<E>, Cloneable, java.io.Serializable
+public class LinkedList<E> extends AbstractSequentialList<E> implements List<E>, Deque<E>, Cloneable, java.io.Serializable
 {
     transient int size = 0;
 
     /**
      * Pointer to first node.
-     * Invariant: (first == null && last == null) ||
-     *            (first.prev == null && first.item != null)
+     * Invariant: (first == null && last == null) || (first.prev == null && first.item != null)
      */
     transient Node<E> first;
 
     /**
      * Pointer to last node.
-     * Invariant: (first == null && last == null) ||
-     *            (last.next == null && last.item != null)
+     * Invariant: (first == null && last == null) || (last.next == null && last.item != null)
      */
     transient Node<E> last;
 
@@ -105,9 +63,7 @@ public class LinkedList<E>
     }
 
     /**
-     * Constructs a list containing the elements of the specified
-     * collection, in the order they are returned by the collection's
-     * iterator.
+     * Constructs a list containing the elements of the specified collection, in the order they are returned by the collection's iterator.
      *
      * @param  c the collection whose elements are to be placed into this list
      * @throws NullPointerException if the specified collection is null
@@ -564,7 +520,7 @@ public class LinkedList<E>
     Node<E> node(int index) {
         // assert isElementIndex(index);
 
-        if (index < (size >> 1)) {
+        if (index < (size >> 1)) { //根据index的实际位置确定是从前向后遍历还是从后向前遍历
             Node<E> x = first;
             for (int i = 0; i < index; i++)
                 x = x.next;
@@ -580,15 +536,12 @@ public class LinkedList<E>
     // Search Operations
 
     /**
-     * Returns the index of the first occurrence of the specified element
-     * in this list, or -1 if this list does not contain the element.
-     * More formally, returns the lowest index {@code i} such that
-     * <tt>(o==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;o.equals(get(i)))</tt>,
-     * or -1 if there is no such index.
+     * Returns the index of the first occurrence of the specified element in this list, or -1 if this list does not contain the element.
+     * More formally, returns the lowest index {@code i} such that (o==null ? get(i)==null : o.equals(get(i))), or -1 if there is no such index.
      *
      * @param o element to search for
-     * @return the index of the first occurrence of the specified element in
-     *         this list, or -1 if this list does not contain the element
+     * @return the index of the first occurrence of the specified element in this list,
+     *         or -1 if this list does not contain the element
      */
     public int indexOf(Object o) {
         int index = 0;
@@ -733,11 +686,9 @@ public class LinkedList<E>
      }
 
     /**
-     * Retrieves, but does not remove, the last element of this list,
-     * or returns {@code null} if this list is empty.
+     * Retrieves, but does not remove, the last element of this list, or returns null if this list is empty.
      *
-     * @return the last element of this list, or {@code null}
-     *         if this list is empty
+     * @return the last element of this list, or null if this list is empty
      * @since 1.6
      */
     public E peekLast() {
@@ -746,11 +697,9 @@ public class LinkedList<E>
     }
 
     /**
-     * Retrieves and removes the first element of this list,
-     * or returns {@code null} if this list is empty.
+     * Retrieves and removes the first element of this list, or returns null if this list is empty.
      *
-     * @return the first element of this list, or {@code null} if
-     *     this list is empty
+     * @return the first element of this list, or {@code null} if this list is empty
      * @since 1.6
      */
     public E pollFirst() {
@@ -759,11 +708,9 @@ public class LinkedList<E>
     }
 
     /**
-     * Retrieves and removes the last element of this list,
-     * or returns {@code null} if this list is empty.
+     * Retrieves and removes the last element of this list, or returns {@code null} if this list is empty.
      *
-     * @return the last element of this list, or {@code null} if
-     *     this list is empty
+     * @return the last element of this list, or {@code null} if this list is empty
      * @since 1.6
      */
     public E pollLast() {

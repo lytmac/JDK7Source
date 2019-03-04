@@ -117,7 +117,7 @@ public class WeakHashMap<K,V> extends AbstractMap<K,V> implements Map<K,V> {
     private final float loadFactor;
 
     /**
-     * 整个WeakHashMap维护了一个全局的ReferenceQueue，接受GC的回收通知。
+     * 一个WeakHashMap对象维护了一个对应的ReferenceQueue，接受GC的回收通知。
      * Reference queue for cleared WeakEntries
      */
     private final ReferenceQueue<Object> queue = new ReferenceQueue<>();

@@ -15,17 +15,18 @@ import java.security.PrivilegedExceptionAction;
  * An Executor that provides methods to manage termination and methods that can produce a Future for tracking progress of one or more asynchronous tasks.
  *
  * 关闭线程池，要考虑拒绝新任务，同时也要考虑如何处理已经提交的任务（还在等待队列里的任务和已经正在执行的任务）
- * shutdown() 会在停止前继续执行已经提交的任务；shutdownNow() 则会阻止执行等待队列里的任务，对于已经提交的任务也会尝试阻止（应该是发出中断请求），但是无法保证任务会马上终止。
+ * shutdown()会在停止前继续执行已经提交的任务；shutdownNow()则会阻止执行等待队列里的任务，对于已经提交的任务也会尝试阻止(应该是发出中断请求)，但是无法保证任务会马上终止。
  * An ExecutorService can be shut down, which will cause it to reject new tasks. Two different methods are provided for shutting down an ExecutorService.
- * The shutdown method will allow previously submitted tasks to execute before terminating,
- * while the shutdownNow method prevents waiting tasks from starting and attempts to stop currently executing tasks.
+ * The shutdown method will allow previously submitted tasks to execute before terminating, while the shutdownNow method prevents waiting tasks from
+ * starting and attempts to stop currently executing tasks.
  *
  * Upon termination, an executor has no tasks actively executing, no tasks awaiting execution, and no new tasks can be submitted.
  * An unused ExecutorService should be shut down to allow reclamation of its resources.
  *
  * Method submit extends base method Executor.execute by creating and returning a Future that can be used to cancel execution and/or wait for completion.
- * 批量执行方法：invokeAny() 执行一个任务即可返回，其他任务取消；invokeAll() 则必须执行全部任务才能返回
- * Methods invokeAny and invokeAll perform the most commonly useful forms of bulk execution, executing a collection of tasks and then waiting for at least one, or all, to complete.
+ * 批量执行方法：invokeAny()执行一个任务即可返回，其他任务取消；invokeAll()则必须执行全部任务才能返回
+ * Methods invokeAny and invokeAll perform the most commonly useful forms of bulk execution, executing a collection of tasks and then waiting for
+ * at least one, or all, to complete.
  *
  * Class ExecutorCompletionService can be used to write customized variants of these methods.
  *
@@ -33,7 +34,8 @@ import java.security.PrivilegedExceptionAction;
  *
  * Usage Examples
  *
- * Here is a sketch of a network service in which threads in a thread pool service incoming requests. It uses the preconfigured Executors.newFixedThreadPool factory method:
+ * Here is a sketch of a network service in which threads in a thread pool service incoming requests. It uses the preconfigured
+ * Executors.newFixedThreadPool factory method:
  *
      * class NetworkService implements Runnable {
      *      private final ServerSocket serverSocket;
@@ -89,14 +91,13 @@ import java.security.PrivilegedExceptionAction;
 public interface ExecutorService extends Executor {
 
     /**
-     * Initiates an orderly shutdown in which previously submitted tasks are executed, but no new tasks will be accepted.
-     * Invocation has no additional effect if already shut down.
+     * Initiates an orderly shutdown in which previously submitted tasks are executed, but no new tasks will be accepted. Invocation has no additional
+     * effect if already shut down.
      *
      * This method does not wait for previously submitted tasks to complete execution.  Use awaitTermination method to do that.
      *
-     * @throws SecurityException if a security manager exists and shutting down this ExecutorService may manipulate
-     *         threads that the caller is not permitted to modify because it does not hold java.lang.RuntimePermission,
-     *         or the security manager's checkAccess method denies access.
+     * @throws SecurityException if a security manager exists and shutting down this ExecutorService may manipulate threads that the caller is not
+     *         permitted to modify because it does not hold java.lang.RuntimePermission, or the security manager's checkAccess method denies access.
      */
     void shutdown();
 
@@ -202,8 +203,7 @@ public interface ExecutorService extends Executor {
      * @throws RejectedExecutionException if any task cannot be scheduled for execution
      */
 
-    <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks)
-        throws InterruptedException;
+    <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException;
 
     /**
      * Executes the given tasks, returning a list of Futures holding their status and results when all complete or the timeout expires, whichever happens first.
@@ -224,9 +224,7 @@ public interface ExecutorService extends Executor {
      * @throws NullPointerException if tasks, any of its elements, or unit are null
      * @throws RejectedExecutionException if any task cannot be scheduled for execution
      */
-    <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks,
-                                  long timeout, TimeUnit unit)
-        throws InterruptedException;
+    <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException;
 
     /**
      * 只要有一个任务成功完成就会返回，如果任务抛出异常不被视为成功完成
@@ -245,8 +243,7 @@ public interface ExecutorService extends Executor {
      * @throws ExecutionException if no task successfully completes
      * @throws RejectedExecutionException if tasks cannot be scheduled for execution
      */
-    <T> T invokeAny(Collection<? extends Callable<T>> tasks)
-        throws InterruptedException, ExecutionException;
+    <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException;
 
     /**
      * Executes the given tasks, returning the result of one that has completed successfully (without throwing an exception), if any do before the given timeout elapses.

@@ -2,25 +2,6 @@
  * Copyright (c) 1994, 2011, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
  */
 package java.lang;
 
@@ -62,116 +43,87 @@ import sun.reflect.misc.ReflectUtil;
 import sun.security.util.SecurityConstants;
 
 /**
- * A class loader is an object that is responsible for loading classes. The
- * class <tt>ClassLoader</tt> is an abstract class.  Given the <a
- * href="#name">binary name</a> of a class, a class loader should attempt to
- * locate or generate data that constitutes a definition for the class.  A
- * typical strategy is to transform the name into a file name and then read a
- * "class file" of that name from a file system.
+ * 类加载器负责定位Class文件，并试图生成构成类定义的数据，即Class对象。
+ * A class loader is an object that is responsible for loading classes. The class ClassLoader is an abstract class. Given the binary name
+ * of a class, a class loader should attempt to locate or generate data that constitutes a definition for the class. A typical strategy is
+ * to transform the name into a file name and then read a "class file" of that name from a file system.
  *
- * <p> Every {@link Class <tt>Class</tt>} object contains a {@link
- * Class#getClassLoader() reference} to the <tt>ClassLoader</tt> that defined
- * it.
+ * 每个类的Class对象都包含一个对定义该类的classLoader的引用，可以通过成员函数getClassLoader()方法获取。
+ * Every Class Class object contains a method Class#getClassLoader() reference to the ClassLoader that defined it.
  *
- * <p> <tt>Class</tt> objects for array classes are not created by class
- * loaders, but are created automatically as required by the Java runtime.
- * The class loader for an array class, as returned by {@link
- * Class#getClassLoader()} is the same as the class loader for its element
- * type; if the element type is a primitive type, then the array class has no
- * class loader.
+ * 数组类的Class对象不是由类加载器创建的，而是由JVM根据需要自动创建。数组类etClassLoader()返回的类加载器与其元素的类加载器一致，如果元素是基础类型，则该数组没有类加载器。
+ * Class objects for array classes are not created by class loaders, but are created automatically as required by the Java runtime. The class
+ * loader for an array class, as returned by Class#getClassLoader() is the same as the class loader for its element type; if the element type
+ * is a primitive type, then the array class has no class loader.
  *
- * <p> Applications implement subclasses of <tt>ClassLoader</tt> in order to
- * extend the manner in which the Java virtual machine dynamically loads
- * classes.
+ * 应用程序需要实现ClassLoader的子类，以自定义JVM动态加载类的方式。
+ * Applications implement subclasses of ClassLoader in order to extend the manner in which the Java virtual machine dynamically loads classes.
  *
- * <p> Class loaders may typically be used by security managers to indicate
- * security domains.
+ * 类加载器通常由安全管理器使用，用于指示安全域???
+ * Class loaders may typically be used by security managers to indicate security domains.
  *
- * <p> The <tt>ClassLoader</tt> class uses a delegation model to search for
- * classes and resources.  Each instance of <tt>ClassLoader</tt> has an
- * associated parent class loader.  When requested to find a class or
- * resource, a <tt>ClassLoader</tt> instance will delegate the search for the
- * class or resource to its parent class loader before attempting to find the
- * class or resource itself.  The virtual machine's built-in class loader,
- * called the "bootstrap class loader", does not itself have a parent but may
- * serve as the parent of a <tt>ClassLoader</tt> instance.
+ * ClassLoader使用委托模型来搜索类和资源。每个ClassLoader对象都必须关联一个父类加载器，需要查找类或资源时，ClassLoader实例会在亲自查找类或资源前，将搜索委托给父类加载器。
+ * The ClassLoader class uses a delegation model to search for classes and resources. Each instance of ClassLoader has an associated parent class
+ * loader. When requested to find a class or resource, a ClassLoader instance will delegate the search for the class or resource to its parent
+ * class loader before attempting to find the class or resource itself.
  *
- * <p> Class loaders that support concurrent loading of classes are known as
- * <em>parallel capable</em> class loaders and are required to register
- * themselves at their class initialization time by invoking the
- * {@link
- * #registerAsParallelCapable <tt>ClassLoader.registerAsParallelCapable</tt>}
- * method. Note that the <tt>ClassLoader</tt> class is registered as parallel
- * capable by default. However, its subclasses still need to register themselves
- * if they are parallel capable. <br>
- * In environments in which the delegation model is not strictly
- * hierarchical, class loaders need to be parallel capable, otherwise class
- * loading can lead to deadlocks because the loader lock is held for the
- * duration of the class loading process (see {@link #loadClass
- * <tt>loadClass</tt>} methods).
+ * JVM内建的ClassLoader(bootstrap class loader)没有父类，但是可以作为所有ClassLoader实例的父类
+ * The virtual machine's built-in class loader, called the "bootstrap class loader", does not itself have a parent but may serve as the parent of
+ * a ClassLoader instance.
  *
- * <p> Normally, the Java virtual machine loads classes from the local file
- * system in a platform-dependent manner.  For example, on UNIX systems, the
- * virtual machine loads classes from the directory defined by the
- * <tt>CLASSPATH</tt> environment variable.
+ * ClassLoader对象如果要支持并发地加载class文件，需要在该ClassLoader类初始化时调用静态方法registerAsParallelCapable()对自己进行注册。ClassLoader类默认是已注册有并发
+ * 能力的，但是其子类仍需要进行注册。
+ * Class loaders that support concurrent loading of classes are known as parallel capable class loaders and are required to register themselves at
+ * their class initialization time by invoking the ClassLoader.registerAsParallelCapable method. Note that the ClassLoader class is registered as
+ * parallel capable by default. However, its subclasses still need to register themselves if they are parallel capable.
  *
- * <p> However, some classes may not originate from a file; they may originate
- * from other sources, such as the network, or they could be constructed by an
- * application.  The method {@link #defineClass(String, byte[], int, int)
- * <tt>defineClass</tt>} converts an array of bytes into an instance of class
- * <tt>Class</tt>. Instances of this newly defined class can be created using
- * {@link Class#newInstance <tt>Class.newInstance</tt>}.
+ * 在委托模型不是严格分层的环境中，ClassLoader需要具有并行能力，否则类加载会导致死锁，因为加载器锁在类加载过程的持续时间内保持（参见loadClass方法）。
+ * In environments in which the delegation model is not strictly hierarchical, class loaders need to be parallel capable, otherwise class loading
+ * can lead to deadlocks because the loader lock is held for the duration of the class loading process (see loadClass methods).
  *
- * <p> The methods and constructors of objects created by a class loader may
- * reference other classes.  To determine the class(es) referred to, the Java
- * virtual machine invokes the {@link #loadClass <tt>loadClass</tt>} method of
- * the class loader that originally created the class.
+ * Normally, the JVM loads classes from the local file system in a platform-dependent manner. For example, on UNIX systems, the JVM loads classes
+ * from the directory defined by the CLASSPATH environment variable. However, some classes may not originate from a file; they may originate from
+ * other sources, such as the network, or they could be constructed by an application.
  *
- * <p> For example, an application could create a network class loader to
- * download class files from a server.  Sample code might look like:
+ * 成员方法defineClass()将字节数组转换成Class对象实例。通过类的Class对象，可以调用Class.newInstance()获取该类的对象实例。
+ * The method defineClass(String, byte[], int, int) defineClass converts an array of bytes into an instance of class Class. Instances of this newly
+ * defined class can be created using Class.newInstance.
  *
- * <blockquote><pre>
- *   ClassLoader loader&nbsp;= new NetworkClassLoader(host,&nbsp;port);
- *   Object main&nbsp;= loader.loadClass("Main", true).newInstance();
- *       &nbsp;.&nbsp;.&nbsp;.
- * </pre></blockquote>
+ * The methods and constructors of objects created by a class loader may reference other classes. To determine the class(es) referred to, the JVM
+ * invokes the loadClass method of the class loader that originally created the class.
  *
- * <p> The network class loader subclass must define the methods {@link
- * #findClass <tt>findClass</tt>} and <tt>loadClassData</tt> to load a class
- * from the network.  Once it has downloaded the bytes that make up the class,
- * it should use the method {@link #defineClass <tt>defineClass</tt>} to
- * create a class instance.  A sample implementation is:
+ * For example, an application could create a network class loader to download class files from a server. Sample code might look like:
  *
- * <blockquote><pre>
- *     class NetworkClassLoader extends ClassLoader {
- *         String host;
- *         int port;
+     *   ClassLoader loader = new NetworkClassLoader(host, port);
+     *   Object main = loader.loadClass("Main", true).newInstance();
  *
- *         public Class findClass(String name) {
- *             byte[] b = loadClassData(name);
- *             return defineClass(name, b, 0, b.length);
- *         }
+ * The network class loader subclass must define the methods findClass and loadClassData to load a class from the network. Once it has downloaded the
+ * bytes that make up the class, it should use the method defineClass to create a class instance. A sample implementation is:
  *
- *         private byte[] loadClassData(String name) {
- *             // load the class data from the connection
- *             &nbsp;.&nbsp;.&nbsp;.
- *         }
- *     }
- * </pre></blockquote>
+     *     class NetworkClassLoader extends ClassLoader {
+     *         String host;
+     *         int port;
+     *
+     *         public Class findClass(String name) {
+     *             byte[] b = loadClassData(name);
+     *             return defineClass(name, b, 0, b.length);
+     *         }
+     *
+     *         private byte[] loadClassData(String name) {
+     *             // load the class data from the connection
+     *         }
+     *     }
  *
- * <h4> <a name="name">Binary names</a> </h4>
+ * Binary names
  *
- * <p> Any class name provided as a {@link String} parameter to methods in
- * <tt>ClassLoader</tt> must be a binary name as defined by
- * <cite>The Java&trade; Language Specification</cite>.
+ * Any class name provided as a String parameter to methods in ClassLoader must be a binary name as defined by 《The Java Language Specification》.
  *
- * <p> Examples of valid class names include:
- * <blockquote><pre>
- *   "java.lang.String"
- *   "javax.swing.JSpinner$DefaultEditor"
- *   "java.security.KeyStore$Builder$FileBuilder$1"
- *   "java.net.URLClassLoader$3$1"
- * </pre></blockquote>
+ * Examples of valid class names include:
+ * "java.lang.String"
+ * "javax.swing.JSpinner$DefaultEditor"
+ * "java.security.KeyStore$Builder$FileBuilder$1"
+ * "java.net.URLClassLoader$3$1"
+ *
  *
  * @see      #resolveClass(Class)
  * @since 1.0
@@ -184,8 +136,7 @@ public abstract class ClassLoader {
     }
 
     // The parent class loader for delegation
-    // Note: VM hardcoded the offset of this field, thus all new fields
-    // must be added *after* it.
+    // Note: VM hardcoded the offset of this field, thus all new fields must be added *after* it.
     private final ClassLoader parent;
 
     /**
@@ -195,7 +146,8 @@ public abstract class ClassLoader {
         private ParallelLoaders() {}
 
         // the set of parallel capable loader types
-        private static final Set<Class<? extends ClassLoader>> loaderTypes = Collections.newSetFromMap(new WeakHashMap<Class<? extends ClassLoader>, Boolean>());
+        private static final Set<Class<? extends ClassLoader>> loaderTypes =
+                Collections.newSetFromMap(new WeakHashMap<Class<? extends ClassLoader>, Boolean>());
 
         static {
             synchronized (loaderTypes) { loaderTypes.add(ClassLoader.class); }
@@ -203,17 +155,14 @@ public abstract class ClassLoader {
 
         /**
          * Registers the given class loader type as parallel capabale.
-         * Returns {@code true} is successfully registered; {@code false} if
-         * loader's super class is not registered.
+         * Returns true is successfully registered; false if loader's super class is not registered.
          */
         static boolean register(Class<? extends ClassLoader> c) {
             synchronized (loaderTypes) {
                 if (loaderTypes.contains(c.getSuperclass())) {
-                    // register the class loader as parallel capable
-                    // if and only if all of its super classes are.
-                    // Note: given current classloading sequence, if
-                    // the immediate super class is parallel capable,
-                    // all the super classes higher up must be too.
+                    // register the class loader as parallel capable if and only if all of its super classes are.
+                    // Note: given current classloading sequence, if  the immediate super class is parallel capable, all the super classes
+                    // higher up must be too.
                     loaderTypes.add(c);
                     return true;
                 } else {
@@ -223,8 +172,7 @@ public abstract class ClassLoader {
         }
 
         /**
-         * Returns {@code true} if the given class loader type is
-         * registered as parallel capable.
+         * Returns true if the given class loader type is registered as parallel capable.
          */
         static boolean isRegistered(Class<? extends ClassLoader> c) {
             synchronized (loaderTypes) {
@@ -233,10 +181,8 @@ public abstract class ClassLoader {
         }
     }
 
-    // Maps class name to the corresponding lock object when the current
-    // class loader is parallel capable.
-    // Note: VM also uses this field to decide if the current class loader
-    // is parallel capable and the appropriate lock object for class loading.
+    // Maps class name to the corresponding lock object when the current class loader is parallel capable.
+    // Note: VM also uses this field to decide if the current class loader is parallel capable and the appropriate lock object for class loading.
     private final ConcurrentHashMap<String, Object> parallelLockMap;
 
     // Hashtable that maps packages to certs
@@ -245,15 +191,11 @@ public abstract class ClassLoader {
     // Shared among all packages with unsigned classes
     private static final Certificate[] nocerts = new Certificate[0];
 
-    // The classes loaded by this class loader. The only purpose of this table
-    // is to keep the classes from being GC'ed until the loader is GC'ed.
+    // The classes loaded by this class loader. The only purpose of this table is to keep the classes from being GC'ed until the loader is GC'ed.
     private final Vector<Class<?>> classes = new Vector<>();
 
-    // The "default" domain. Set as the default ProtectionDomain on newly
-    // created classes.
-    private final ProtectionDomain defaultDomain =
-        new ProtectionDomain(new CodeSource(null, (Certificate[]) null),
-                             null, this, null);
+    // The "default" domain. Set as the default ProtectionDomain on newly created classes.
+    private final ProtectionDomain defaultDomain = new ProtectionDomain(new CodeSource(null, (Certificate[]) null), null, this, null);
 
     // The initiating protection domains for all classes loaded by this loader
     private final Set<ProtectionDomain> domains;
@@ -263,8 +205,7 @@ public abstract class ClassLoader {
         classes.addElement(c);
     }
 
-    // The packages defined in this class loader.  Each package name is mapped
-    // to its corresponding Package object.
+    // The packages defined in this class loader. Each package name is mapped to its corresponding Package object.
     // @GuardedBy("itself")
     private final HashMap<String, Package> packages = new HashMap<>();
 
@@ -294,21 +235,13 @@ public abstract class ClassLoader {
     }
 
     /**
-     * Creates a new class loader using the specified parent class loader for
-     * delegation.
+     * Creates a new class loader using the specified parent class loader for delegation.
      *
-     * <p> If there is a security manager, its {@link
-     * SecurityManager#checkCreateClassLoader()
-     * <tt>checkCreateClassLoader</tt>} method is invoked.  This may result in
-     * a security exception.  </p>
+     * If there is a security manager, its SecurityManager.checkCreateClassLoader() method is invoked. This may result in a security exception.
      *
-     * @param  parent
-     *         The parent class loader
+     * @param  parent The parent class loader
      *
-     * @throws  SecurityException
-     *          If a security manager exists and its
-     *          <tt>checkCreateClassLoader</tt> method doesn't allow creation
-     *          of a new class loader.
+     * @throws  SecurityException If a security manager exists and its checkCreateClassLoader method doesn't allow creation of a new class loader.
      *
      * @since  1.2
      */
@@ -317,19 +250,11 @@ public abstract class ClassLoader {
     }
 
     /**
-     * Creates a new class loader using the <tt>ClassLoader</tt> returned by
-     * the method {@link #getSystemClassLoader()
-     * <tt>getSystemClassLoader()</tt>} as the parent class loader.
+     * Creates a new class loader using the ClassLoader returned by the method getSystemClassLoader() as the parent class loader.
      *
-     * <p> If there is a security manager, its {@link
-     * SecurityManager#checkCreateClassLoader()
-     * <tt>checkCreateClassLoader</tt>} method is invoked.  This may result in
-     * a security exception.  </p>
+     * If there is a security manager, its SecurityManager#checkCreateClassLoader() method is invoked. This may result in a security exception.
      *
-     * @throws  SecurityException
-     *          If a security manager exists and its
-     *          <tt>checkCreateClassLoader</tt> method doesn't allow creation
-     *          of a new class loader.
+     * @throws  SecurityException If a security manager exists and its checkCreateClassLoader method doesn't allow creation of a new class loader.
      */
     protected ClassLoader() {
         this(checkCreateClassLoader(), getSystemClassLoader());
@@ -338,90 +263,65 @@ public abstract class ClassLoader {
     // -- Class --
 
     /**
-     * Loads the class with the specified <a href="#name">binary name</a>.
-     * This method searches for classes in the same manner as the {@link
-     * #loadClass(String, boolean)} method.  It is invoked by the Java virtual
-     * machine to resolve class references.  Invoking this method is equivalent
-     * to invoking {@link #loadClass(String, boolean) <tt>loadClass(name,
-     * false)</tt>}.  </p>
+     * Loads the class with the specified binary name. This method searches for classes in the same manner as the  loadClass(String, boolean) method.
+     * It is invoked by the Java virtual machine to resolve class references. Invoking this method is equivalent to invoking loadClass(name, false).
      *
-     * @param  name
-     *         The <a href="#name">binary name</a> of the class
+     * @param  name The binary name of the class
      *
-     * @return  The resulting <tt>Class</tt> object
+     * @return  The resulting Class object
      *
-     * @throws  ClassNotFoundException
-     *          If the class was not found
+     * @throws  ClassNotFoundException If the class was not found
      */
     public Class<?> loadClass(String name) throws ClassNotFoundException {
         return loadClass(name, false);
     }
 
     /**
-     * Loads the class with the specified <a href="#name">binary name</a>.  The
-     * default implementation of this method searches for classes in the
-     * following order:
+     * Loads the class with the specified binary name. The default implementation of this method searches for classes in the following order:
      *
-     * <p><ol>
+     *   1. Invoke findLoadedClass(String) method to check if the class has already been loaded.
      *
-     *   <li><p> Invoke {@link #findLoadedClass(String)} to check if the class
-     *   has already been loaded.  </p></li>
+     *   2. Invoke the loadClass(String) method on the parent class loader. If the parent is null the class loader built-in to the virtual machine
+     *   is used, instead.
      *
-     *   <li><p> Invoke the {@link #loadClass(String) <tt>loadClass</tt>} method
-     *   on the parent class loader.  If the parent is <tt>null</tt> the class
-     *   loader built-in to the virtual machine is used, instead.  </p></li>
+     *   3. Invoke the findClass(String) method to find the class.
      *
-     *   <li><p> Invoke the {@link #findClass(String)} method to find the
-     *   class.  </p></li>
+     * If the class was found using the above steps, and the resolve flag is true, this method will then invoke the resolveClass(Class) method on the
+     * resulting Class object.
      *
-     * </ol>
+     * Subclasses of ClassLoader are encouraged to override findClass(String), rather than this method.
      *
-     * <p> If the class was found using the above steps, and the
-     * <tt>resolve</tt> flag is true, this method will then invoke the {@link
-     * #resolveClass(Class)} method on the resulting <tt>Class</tt> object.
+     * Unless overridden, this method synchronizes on the result of getClassLoadingLock() method during the entire class loading process.
      *
-     * <p> Subclasses of <tt>ClassLoader</tt> are encouraged to override {@link
-     * #findClass(String)}, rather than this method.  </p>
+     * @param  name The binary name of the class
      *
-     * <p> Unless overridden, this method synchronizes on the result of
-     * {@link #getClassLoadingLock <tt>getClassLoadingLock</tt>} method
-     * during the entire class loading process.
+     * @param  resolve If true then resolve the class
      *
-     * @param  name
-     *         The <a href="#name">binary name</a> of the class
+     * @return  The resulting Class object
      *
-     * @param  resolve
-     *         If <tt>true</tt> then resolve the class
-     *
-     * @return  The resulting <tt>Class</tt> object
-     *
-     * @throws  ClassNotFoundException
-     *          If the class could not be found
+     * @throws  ClassNotFoundException If the class could not be found
      */
-    protected Class<?> loadClass(String name, boolean resolve)
-        throws ClassNotFoundException
-    {
-        synchronized (getClassLoadingLock(name)) {
+    protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+        synchronized (getClassLoadingLock(name)) { //这里要做同步
             // First, check if the class has already been loaded
             Class c = findLoadedClass(name);
-            if (c == null) {
+            if (c == null) { //该类还未加载
                 long t0 = System.nanoTime();
                 try {
                     if (parent != null) {
-                        c = parent.loadClass(name, false);
+                        c = parent.loadClass(name, false); //委托给父类加载器进行类加载
                     } else {
+                        //如果没有明确定义父类加载器，则通过JVM内建的bootstrap class loader进行类加载
                         c = findBootstrapClassOrNull(name);
                     }
                 } catch (ClassNotFoundException e) {
-                    // ClassNotFoundException thrown if class not found
-                    // from the non-null parent class loader
+                    // ClassNotFoundException thrown if class not found from the non-null parent class loader
                 }
 
                 if (c == null) {
-                    // If still not found, then invoke findClass in order
-                    // to find the class.
+                    // If still not found, then invoke findClass in order to find the class.
                     long t1 = System.nanoTime();
-                    c = findClass(name);
+                    c = findClass(name); //抽象方法，交给子类去实现该方法，以对默认的加载行为进行扩展。
 
                     // this is the defining class loader; record the stats
                     sun.misc.PerfCounter.getParentDelegationTime().addTime(t1 - t0);
@@ -450,7 +350,7 @@ public abstract class ClassLoader {
      * @return the lock for class loading operations
      *
      * @throws NullPointerException
-     *         If registered as parallel capable and <tt>className</tt> is null
+     *         If registered as parallel capable and className is null
      *
      * @see #loadClass(String, boolean)
      *
@@ -512,14 +412,14 @@ public abstract class ClassLoader {
      * Finds the class with the specified <a href="#name">binary name</a>.
      * This method should be overridden by class loader implementations that
      * follow the delegation model for loading classes, and will be invoked by
-     * the {@link #loadClass <tt>loadClass</tt>} method after checking the
+     * the #loadClass loadClass} method after checking the
      * parent class loader for the requested class.  The default implementation
-     * throws a <tt>ClassNotFoundException</tt>.  </p>
+     * throws a ClassNotFoundException.  </p>
      *
      * @param  name
      *         The <a href="#name">binary name</a> of the class
      *
-     * @return  The resulting <tt>Class</tt> object
+     * @return  The resulting Class object
      *
      * @throws  ClassNotFoundException
      *          If the class could not be found
@@ -531,32 +431,32 @@ public abstract class ClassLoader {
     }
 
     /**
-     * Converts an array of bytes into an instance of class <tt>Class</tt>.
-     * Before the <tt>Class</tt> can be used it must be resolved.  This method
+     * Converts an array of bytes into an instance of class Class.
+     * Before the Class can be used it must be resolved.  This method
      * is deprecated in favor of the version that takes a <a
      * href="#name">binary name</a> as its first argument, and is more secure.
      *
      * @param  b
      *         The bytes that make up the class data.  The bytes in positions
-     *         <tt>off</tt> through <tt>off+len-1</tt> should have the format
+     *         off through off+len-1 should have the format
      *         of a valid class file as defined by
      *         <cite>The Java&trade; Virtual Machine Specification</cite>.
      *
      * @param  off
-     *         The start offset in <tt>b</tt> of the class data
+     *         The start offset in b of the class data
      *
      * @param  len
      *         The length of the class data
      *
-     * @return  The <tt>Class</tt> object that was created from the specified
+     * @return  The Class object that was created from the specified
      *          class data
      *
      * @throws  ClassFormatError
      *          If the data did not contain a valid class
      *
      * @throws  IndexOutOfBoundsException
-     *          If either <tt>off</tt> or <tt>len</tt> is negative, or if
-     *          <tt>off+len</tt> is greater than <tt>b.length</tt>.
+     *          If either off or len is negative, or if
+     *          off+len is greater than b.length.
      *
      * @throws  SecurityException
      *          If an attempt is made to add this class to a package that
@@ -568,7 +468,7 @@ public abstract class ClassLoader {
      * @see  #loadClass(String, boolean)
      * @see  #resolveClass(Class)
      *
-     * @deprecated  Replaced by {@link #defineClass(String, byte[], int, int)
+     * @deprecated  Replaced by #defineClass(String, byte[], int, int)
      * defineClass(String, byte[], int, int)}
      */
     @Deprecated
@@ -580,55 +480,55 @@ public abstract class ClassLoader {
     }
 
     /**
-     * Converts an array of bytes into an instance of class <tt>Class</tt>.
-     * Before the <tt>Class</tt> can be used it must be resolved.
+     * Converts an array of bytes into an instance of class Class.
+     * Before the Class can be used it must be resolved.
      *
-     * <p> This method assigns a default {@link java.security.ProtectionDomain
-     * <tt>ProtectionDomain</tt>} to the newly defined class.  The
-     * <tt>ProtectionDomain</tt> is effectively granted the same set of
-     * permissions returned when {@link
+     * This method assigns a default java.security.ProtectionDomain
+     * ProtectionDomain} to the newly defined class.  The
+     * ProtectionDomain is effectively granted the same set of
+     * permissions returned when 
      * java.security.Policy#getPermissions(java.security.CodeSource)
-     * <tt>Policy.getPolicy().getPermissions(new CodeSource(null, null))</tt>}
+     * Policy.getPolicy().getPermissions(new CodeSource(null, null))}
      * is invoked.  The default domain is created on the first invocation of
-     * {@link #defineClass(String, byte[], int, int) <tt>defineClass</tt>},
+     * #defineClass(String, byte[], int, int) defineClass},
      * and re-used on subsequent invocations.
      *
-     * <p> To assign a specific <tt>ProtectionDomain</tt> to the class, use
-     * the {@link #defineClass(String, byte[], int, int,
-     * java.security.ProtectionDomain) <tt>defineClass</tt>} method that takes a
-     * <tt>ProtectionDomain</tt> as one of its arguments.  </p>
+     * To assign a specific ProtectionDomain to the class, use
+     * the #defineClass(String, byte[], int, int,
+     * java.security.ProtectionDomain) defineClass} method that takes a
+     * ProtectionDomain as one of its arguments.  </p>
      *
      * @param  name
      *         The expected <a href="#name">binary name</a> of the class, or
-     *         <tt>null</tt> if not known
+     *         null if not known
      *
      * @param  b
      *         The bytes that make up the class data.  The bytes in positions
-     *         <tt>off</tt> through <tt>off+len-1</tt> should have the format
+     *         off through off+len-1 should have the format
      *         of a valid class file as defined by
      *         <cite>The Java&trade; Virtual Machine Specification</cite>.
      *
      * @param  off
-     *         The start offset in <tt>b</tt> of the class data
+     *         The start offset in b of the class data
      *
      * @param  len
      *         The length of the class data
      *
-     * @return  The <tt>Class</tt> object that was created from the specified
+     * @return  The Class object that was created from the specified
      *          class data.
      *
      * @throws  ClassFormatError
      *          If the data did not contain a valid class
      *
      * @throws  IndexOutOfBoundsException
-     *          If either <tt>off</tt> or <tt>len</tt> is negative, or if
-     *          <tt>off+len</tt> is greater than <tt>b.length</tt>.
+     *          If either off or len is negative, or if
+     *          off+len is greater than b.length.
      *
      * @throws  SecurityException
      *          If an attempt is made to add this class to a package that
      *          contains classes that were signed by a different set of
      *          certificates than this class (which is unsigned), or if
-     *          <tt>name</tt> begins with "<tt>java.</tt>".
+     *          name begins with "java.".
      *
      * @see  #loadClass(String, boolean)
      * @see  #resolveClass(Class)
@@ -723,43 +623,43 @@ public abstract class ClassLoader {
     }
 
     /**
-     * Converts an array of bytes into an instance of class <tt>Class</tt>,
-     * with an optional <tt>ProtectionDomain</tt>.  If the domain is
-     * <tt>null</tt>, then a default domain will be assigned to the class as
-     * specified in the documentation for {@link #defineClass(String, byte[],
+     * Converts an array of bytes into an instance of class Class,
+     * with an optional ProtectionDomain.  If the domain is
+     * null, then a default domain will be assigned to the class as
+     * specified in the documentation for #defineClass(String, byte[],
      * int, int)}.  Before the class can be used it must be resolved.
      *
-     * <p> The first class defined in a package determines the exact set of
+     * The first class defined in a package determines the exact set of
      * certificates that all subsequent classes defined in that package must
      * contain.  The set of certificates for a class is obtained from the
-     * {@link java.security.CodeSource <tt>CodeSource</tt>} within the
-     * <tt>ProtectionDomain</tt> of the class.  Any classes added to that
+     * java.security.CodeSource CodeSource} within the
+     * ProtectionDomain of the class.  Any classes added to that
      * package must contain the same set of certificates or a
-     * <tt>SecurityException</tt> will be thrown.  Note that if
-     * <tt>name</tt> is <tt>null</tt>, this check is not performed.
+     * SecurityException will be thrown.  Note that if
+     * name is null, this check is not performed.
      * You should always pass in the <a href="#name">binary name</a> of the
      * class you are defining as well as the bytes.  This ensures that the
      * class you are defining is indeed the class you think it is.
      *
-     * <p> The specified <tt>name</tt> cannot begin with "<tt>java.</tt>", since
-     * all classes in the "<tt>java.*</tt> packages can only be defined by the
-     * bootstrap class loader.  If <tt>name</tt> is not <tt>null</tt>, it
+     * The specified name cannot begin with "java.", since
+     * all classes in the "java.* packages can only be defined by the
+     * bootstrap class loader.  If name is not null, it
      * must be equal to the <a href="#name">binary name</a> of the class
-     * specified by the byte array "<tt>b</tt>", otherwise a {@link
-     * <tt>NoClassDefFoundError</tt>} will be thrown.  </p>
+     * specified by the byte array "b", otherwise a 
+     * NoClassDefFoundError} will be thrown.  </p>
      *
      * @param  name
      *         The expected <a href="#name">binary name</a> of the class, or
-     *         <tt>null</tt> if not known
+     *         null if not known
      *
      * @param  b
      *         The bytes that make up the class data. The bytes in positions
-     *         <tt>off</tt> through <tt>off+len-1</tt> should have the format
+     *         off through off+len-1 should have the format
      *         of a valid class file as defined by
      *         <cite>The Java&trade; Virtual Machine Specification</cite>.
      *
      * @param  off
-     *         The start offset in <tt>b</tt> of the class data
+     *         The start offset in b of the class data
      *
      * @param  len
      *         The length of the class data
@@ -767,25 +667,25 @@ public abstract class ClassLoader {
      * @param  protectionDomain
      *         The ProtectionDomain of the class
      *
-     * @return  The <tt>Class</tt> object created from the data,
-     *          and optional <tt>ProtectionDomain</tt>.
+     * @return  The Class object created from the data,
+     *          and optional ProtectionDomain.
      *
      * @throws  ClassFormatError
      *          If the data did not contain a valid class
      *
      * @throws  NoClassDefFoundError
-     *          If <tt>name</tt> is not equal to the <a href="#name">binary
-     *          name</a> of the class specified by <tt>b</tt>
+     *          If name is not equal to the <a href="#name">binary
+     *          name</a> of the class specified by b
      *
      * @throws  IndexOutOfBoundsException
-     *          If either <tt>off</tt> or <tt>len</tt> is negative, or if
-     *          <tt>off+len</tt> is greater than <tt>b.length</tt>.
+     *          If either off or len is negative, or if
+     *          off+len is greater than b.length.
      *
      * @throws  SecurityException
      *          If an attempt is made to add this class to a package that
      *          contains classes that were signed by a different set of
-     *          certificates than this class, or if <tt>name</tt> begins with
-     *          "<tt>java.</tt>".
+     *          certificates than this class, or if name begins with
+     *          "java.".
      */
     protected final Class<?> defineClass(String name, byte[] b, int off, int len,
                                          ProtectionDomain protectionDomain)
@@ -808,62 +708,62 @@ public abstract class ClassLoader {
     }
 
     /**
-     * Converts a {@link java.nio.ByteBuffer <tt>ByteBuffer</tt>}
-     * into an instance of class <tt>Class</tt>,
-     * with an optional <tt>ProtectionDomain</tt>.  If the domain is
-     * <tt>null</tt>, then a default domain will be assigned to the class as
-     * specified in the documentation for {@link #defineClass(String, byte[],
+     * Converts a java.nio.ByteBuffer ByteBuffer}
+     * into an instance of class Class,
+     * with an optional ProtectionDomain.  If the domain is
+     * null, then a default domain will be assigned to the class as
+     * specified in the documentation for #defineClass(String, byte[],
      * int, int)}.  Before the class can be used it must be resolved.
      *
      * <p>The rules about the first class defined in a package determining the
      * set of certificates for the package, and the restrictions on class names
-     * are identical to those specified in the documentation for {@link
+     * are identical to those specified in the documentation for 
      * #defineClass(String, byte[], int, int, ProtectionDomain)}.
      *
-     * <p> An invocation of this method of the form
-     * <i>cl</i><tt>.defineClass(</tt><i>name</i><tt>,</tt>
-     * <i>bBuffer</i><tt>,</tt> <i>pd</i><tt>)</tt> yields exactly the same
+     * An invocation of this method of the form
+     * <i>cl</i>.defineClass(<i>name</i>,
+     * <i>bBuffer</i>, <i>pd</i>) yields exactly the same
      * result as the statements
      *
-     * <blockquote><tt>
+     * <blockquote>
      * ...<br>
-     * byte[] temp = new byte[</tt><i>bBuffer</i><tt>.{@link
+     * byte[] temp = new byte[<i>bBuffer</i>.
      * java.nio.ByteBuffer#remaining remaining}()];<br>
-     *     </tt><i>bBuffer</i><tt>.{@link java.nio.ByteBuffer#get(byte[])
+     *     <i>bBuffer</i>.java.nio.ByteBuffer#get(byte[])
      * get}(temp);<br>
-     *     return {@link #defineClass(String, byte[], int, int, ProtectionDomain)
-     * </tt><i>cl</i><tt>.defineClass}(</tt><i>name</i><tt>, temp, 0,
-     * temp.length, </tt><i>pd</i><tt>);<br>
-     * </tt></blockquote>
+     *     return #defineClass(String, byte[], int, int, ProtectionDomain)
+     * <i>cl</i>.defineClass}(<i>name</i>, temp, 0,
+     * temp.length, <i>pd</i>);<br>
+     * </blockquote>
      *
      * @param  name
      *         The expected <a href="#name">binary name</a>. of the class, or
-     *         <tt>null</tt> if not known
+     *         null if not known
      *
      * @param  b
      *         The bytes that make up the class data. The bytes from positions
-     *         <tt>b.position()</tt> through <tt>b.position() + b.limit() -1
-     *         </tt> should have the format of a valid class file as defined by
+     *         b.position() through b.position() + b.limit() -1
+     *          should have the format of a valid class file as defined by
      *         <cite>The Java&trade; Virtual Machine Specification</cite>.
      *
      * @param  protectionDomain
-     *         The ProtectionDomain of the class, or <tt>null</tt>.
+     *         The ProtectionDomain of the class, or null.
      *
-     * @return  The <tt>Class</tt> object created from the data,
-     *          and optional <tt>ProtectionDomain</tt>.
+     * @return  The Class object created from the data,
+     *          and optional ProtectionDomain.
      *
      * @throws  ClassFormatError
      *          If the data did not contain a valid class.
      *
      * @throws  NoClassDefFoundError
-     *          If <tt>name</tt> is not equal to the <a href="#name">binary
-     *          name</a> of the class specified by <tt>b</tt>
+     *          If name is not equal to the <a href="#name">binary
+     *          name</a> of the class specified by b
      *
      * @throws  SecurityException
      *          If an attempt is made to add this class to a package that
      *          contains classes that were signed by a different set of
-     *          certificates than this class, or if <tt>name</tt> begins with
-     *          "<tt>java.</tt>".
+     *          certificates than this class, or if name begins with
+     *          "java.".
      *
      * @see      #defineClass(String, byte[], int, int, ProtectionDomain)
      *
@@ -1001,7 +901,7 @@ public abstract class ClassLoader {
 
     /**
      * Links the specified class.  This (misleadingly named) method may be
-     * used by a class loader to link a class.  If the class <tt>c</tt> has
+     * used by a class loader to link a class.  If the class c has
      * already been linked, then this method simply returns. Otherwise, the
      * class is linked as described in the "Execution" chapter of
      * <cite>The Java&trade; Language Specification</cite>.
@@ -1011,7 +911,7 @@ public abstract class ClassLoader {
      *         The class to link
      *
      * @throws  NullPointerException
-     *          If <tt>c</tt> is <tt>null</tt>.
+     *          If c is null.
      *
      * @see  #defineClass(String, byte[], int, int)
      */
@@ -1022,30 +922,22 @@ public abstract class ClassLoader {
     private native void resolveClass0(Class c);
 
     /**
-     * Finds a class with the specified <a href="#name">binary name</a>,
-     * loading it if necessary.
+     * Finds a class with the specified binary name, loading it if necessary.
      *
-     * <p> This method loads the class through the system class loader (see
-     * {@link #getSystemClassLoader()}).  The <tt>Class</tt> object returned
-     * might have more than one <tt>ClassLoader</tt> associated with it.
-     * Subclasses of <tt>ClassLoader</tt> need not usually invoke this method,
-     * because most class loaders need to override just {@link
-     * #findClass(String)}.  </p>
+     * This method loads the class through the system class loader (see getSystemClassLoader()). The Class object returned might have more than
+     * one ClassLoader associated with it. Subclasses of ClassLoader need not usually invoke this method, because most class loaders need to
+     * override just findClass(String).
      *
-     * @param  name
-     *         The <a href="#name">binary name</a> of the class
+     * @param  name The binary name of the class
      *
-     * @return  The <tt>Class</tt> object for the specified <tt>name</tt>
+     * @return  The Class object for the specified name
      *
-     * @throws  ClassNotFoundException
-     *          If the class could not be found
+     * @throws  ClassNotFoundException If the class could not be found
      *
      * @see  #ClassLoader(ClassLoader)
      * @see  #getParent()
      */
-    protected final Class<?> findSystemClass(String name)
-        throws ClassNotFoundException
-    {
+    protected final Class<?> findSystemClass(String name) throws ClassNotFoundException {
         ClassLoader system = getSystemClassLoader();
         if (system == null) {
             if (!checkName(name))
@@ -1077,12 +969,12 @@ public abstract class ClassLoader {
      * Returns the class with the given <a href="#name">binary name</a> if this
      * loader has been recorded by the Java virtual machine as an initiating
      * loader of a class with that <a href="#name">binary name</a>.  Otherwise
-     * <tt>null</tt> is returned.  </p>
+     * null is returned.  </p>
      *
      * @param  name
      *         The <a href="#name">binary name</a> of the class
      *
-     * @return  The <tt>Class</tt> object, or <tt>null</tt> if the class has
+     * @return  The Class object, or null if the class has
      *          not been loaded
      *
      * @since  1.1
@@ -1100,7 +992,7 @@ public abstract class ClassLoader {
      * class.  </p>
      *
      * @param  c
-     *         The <tt>Class</tt> object
+     *         The Class object
      *
      * @param  signers
      *         The signers for the class
@@ -1119,19 +1011,19 @@ public abstract class ClassLoader {
      * (images, audio, text, etc) that can be accessed by class code in a way
      * that is independent of the location of the code.
      *
-     * <p> The name of a resource is a '<tt>/</tt>'-separated path name that
+     * The name of a resource is a '/'-separated path name that
      * identifies the resource.
      *
-     * <p> This method will first search the parent class loader for the
-     * resource; if the parent is <tt>null</tt> the path of the class loader
+     * This method will first search the parent class loader for the
+     * resource; if the parent is null the path of the class loader
      * built-in to the virtual machine is searched.  That failing, this method
-     * will invoke {@link #findResource(String)} to find the resource.  </p>
+     * will invoke #findResource(String)} to find the resource.  </p>
      *
      * @param  name
      *         The resource name
      *
-     * @return  A <tt>URL</tt> object for reading the resource, or
-     *          <tt>null</tt> if the resource could not be found or the invoker
+     * @return  A URL object for reading the resource, or
+     *          null if the resource could not be found or the invoker
      *          doesn't have adequate  privileges to get the resource.
      *
      * @since  1.1
@@ -1154,16 +1046,16 @@ public abstract class ClassLoader {
      * (images, audio, text, etc) that can be accessed by class code in a way
      * that is independent of the location of the code.
      *
-     * <p>The name of a resource is a <tt>/</tt>-separated path name that
+     * <p>The name of a resource is a /-separated path name that
      * identifies the resource.
      *
-     * <p> The search order is described in the documentation for {@link
+     * The search order is described in the documentation for 
      * #getResource(String)}.  </p>
      *
      * @param  name
      *         The resource name
      *
-     * @return  An enumeration of {@link java.net.URL <tt>URL</tt>} objects for
+     * @return  An enumeration of java.net.URL URL} objects for
      *          the resource.  If no resources could  be found, the enumeration
      *          will be empty.  Resources that the class loader doesn't have
      *          access to will not be in the enumeration.
@@ -1194,8 +1086,8 @@ public abstract class ClassLoader {
      * @param  name
      *         The resource name
      *
-     * @return  A <tt>URL</tt> object for reading the resource, or
-     *          <tt>null</tt> if the resource could not be found
+     * @return  A URL object for reading the resource, or
+     *          null if the resource could not be found
      *
      * @since  1.2
      */
@@ -1204,7 +1096,7 @@ public abstract class ClassLoader {
     }
 
     /**
-     * Returns an enumeration of {@link java.net.URL <tt>URL</tt>} objects
+     * Returns an enumeration of java.net.URL URL} objects
      * representing all the resources with the given name. Class loader
      * implementations should override this method to specify where to load
      * resources from.  </p>
@@ -1212,7 +1104,7 @@ public abstract class ClassLoader {
      * @param  name
      *         The resource name
      *
-     * @return  An enumeration of {@link java.net.URL <tt>URL</tt>} objects for
+     * @return  An enumeration of java.net.URL URL} objects for
      *          the resources
      *
      * @throws  IOException
@@ -1249,13 +1141,13 @@ public abstract class ClassLoader {
     /**
      * Find a resource of the specified name from the search path used to load
      * classes.  This method locates the resource through the system class
-     * loader (see {@link #getSystemClassLoader()}).  </p>
+     * loader (see #getSystemClassLoader()}).  </p>
      *
      * @param  name
      *         The resource name
      *
-     * @return  A {@link java.net.URL <tt>URL</tt>} object for reading the
-     *          resource, or <tt>null</tt> if the resource could not be found
+     * @return  A java.net.URL URL} object for reading the
+     *          resource, or null if the resource could not be found
      *
      * @since  1.1
      */
@@ -1270,16 +1162,16 @@ public abstract class ClassLoader {
     /**
      * Finds all resources of the specified name from the search path used to
      * load classes.  The resources thus found are returned as an
-     * {@link java.util.Enumeration <tt>Enumeration</tt>} of {@link
-     * java.net.URL <tt>URL</tt>} objects.
+     * java.util.Enumeration Enumeration} of 
+     * java.net.URL URL} objects.
      *
-     * <p> The search order is described in the documentation for {@link
+     * The search order is described in the documentation for 
      * #getSystemResource(String)}.  </p>
      *
      * @param  name
      *         The resource name
      *
-     * @return  An enumeration of resource {@link java.net.URL <tt>URL</tt>}
+     * @return  An enumeration of resource java.net.URL URL}
      *          objects
      *
      * @throws  IOException
@@ -1333,13 +1225,13 @@ public abstract class ClassLoader {
     /**
      * Returns an input stream for reading the specified resource.
      *
-     * <p> The search order is described in the documentation for {@link
+     * The search order is described in the documentation for 
      * #getResource(String)}.  </p>
      *
      * @param  name
      *         The resource name
      *
-     * @return  An input stream for reading the resource, or <tt>null</tt>
+     * @return  An input stream for reading the resource, or null
      *          if the resource could not be found
      *
      * @since  1.1
@@ -1356,12 +1248,12 @@ public abstract class ClassLoader {
     /**
      * Open for reading, a resource of the specified name from the search path
      * used to load classes.  This method locates the resource through the
-     * system class loader (see {@link #getSystemClassLoader()}).  </p>
+     * system class loader (see #getSystemClassLoader()}).  </p>
      *
      * @param  name
      *         The resource name
      *
-     * @return  An input stream for reading the resource, or <tt>null</tt>
+     * @return  An input stream for reading the resource, or null
      *          if the resource could not be found
      *
      * @since  1.1
@@ -1380,24 +1272,24 @@ public abstract class ClassLoader {
 
     /**
      * Returns the parent class loader for delegation. Some implementations may
-     * use <tt>null</tt> to represent the bootstrap class loader. This method
-     * will return <tt>null</tt> in such implementations if this class loader's
+     * use null to represent the bootstrap class loader. This method
+     * will return null in such implementations if this class loader's
      * parent is the bootstrap class loader.
      *
-     * <p> If a security manager is present, and the invoker's class loader is
-     * not <tt>null</tt> and is not an ancestor of this class loader, then this
-     * method invokes the security manager's {@link
+     * If a security manager is present, and the invoker's class loader is
+     * not null and is not an ancestor of this class loader, then this
+     * method invokes the security manager's 
      * SecurityManager#checkPermission(java.security.Permission)
-     * <tt>checkPermission</tt>} method with a {@link
+     * checkPermission} method with a 
      * RuntimePermission#RuntimePermission(String)
-     * <tt>RuntimePermission("getClassLoader")</tt>} permission to verify
+     * RuntimePermission("getClassLoader")} permission to verify
      * access to the parent class loader is permitted.  If not, a
-     * <tt>SecurityException</tt> will be thrown.  </p>
+     * SecurityException will be thrown.  </p>
      *
-     * @return  The parent <tt>ClassLoader</tt>
+     * @return  The parent ClassLoader
      *
      * @throws  SecurityException
-     *          If a security manager exists and its <tt>checkPermission</tt>
+     *          If a security manager exists and its checkPermission
      *          method doesn't allow access to this class loader's parent class
      *          loader.
      *
@@ -1416,56 +1308,56 @@ public abstract class ClassLoader {
 
     /**
      * Returns the system class loader for delegation.  This is the default
-     * delegation parent for new <tt>ClassLoader</tt> instances, and is
+     * delegation parent for new ClassLoader instances, and is
      * typically the class loader used to start the application.
      *
-     * <p> This method is first invoked early in the runtime's startup
+     * This method is first invoked early in the runtime's startup
      * sequence, at which point it creates the system class loader and sets it
-     * as the context class loader of the invoking <tt>Thread</tt>.
+     * as the context class loader of the invoking Thread.
      *
-     * <p> The default system class loader is an implementation-dependent
+     * The default system class loader is an implementation-dependent
      * instance of this class.
      *
-     * <p> If the system property "<tt>java.system.class.loader</tt>" is defined
+     * If the system property "java.system.class.loader" is defined
      * when this method is first invoked then the value of that property is
      * taken to be the name of a class that will be returned as the system
      * class loader.  The class is loaded using the default system class loader
      * and must define a public constructor that takes a single parameter of
-     * type <tt>ClassLoader</tt> which is used as the delegation parent.  An
+     * type ClassLoader which is used as the delegation parent.  An
      * instance is then created using this constructor with the default system
      * class loader as the parameter.  The resulting class loader is defined
      * to be the system class loader.
      *
-     * <p> If a security manager is present, and the invoker's class loader is
-     * not <tt>null</tt> and the invoker's class loader is not the same as or
+     * If a security manager is present, and the invoker's class loader is
+     * not null and the invoker's class loader is not the same as or
      * an ancestor of the system class loader, then this method invokes the
-     * security manager's {@link
+     * security manager's 
      * SecurityManager#checkPermission(java.security.Permission)
-     * <tt>checkPermission</tt>} method with a {@link
+     * checkPermission} method with a 
      * RuntimePermission#RuntimePermission(String)
-     * <tt>RuntimePermission("getClassLoader")</tt>} permission to verify
+     * RuntimePermission("getClassLoader")} permission to verify
      * access to the system class loader.  If not, a
-     * <tt>SecurityException</tt> will be thrown.  </p>
+     * SecurityException will be thrown.  </p>
      *
-     * @return  The system <tt>ClassLoader</tt> for delegation, or
-     *          <tt>null</tt> if none
+     * @return  The system ClassLoader for delegation, or
+     *          null if none
      *
      * @throws  SecurityException
-     *          If a security manager exists and its <tt>checkPermission</tt>
+     *          If a security manager exists and its checkPermission
      *          method doesn't allow access to the system class loader.
      *
      * @throws  IllegalStateException
      *          If invoked recursively during the construction of the class
-     *          loader specified by the "<tt>java.system.class.loader</tt>"
+     *          loader specified by the "java.system.class.loader"
      *          property.
      *
      * @throws  Error
-     *          If the system property "<tt>java.system.class.loader</tt>"
+     *          If the system property "java.system.class.loader"
      *          is defined but the named class could not be loaded, the
      *          provider class does not define the required constructor, or an
      *          exception is thrown by that constructor when it is invoked. The
      *          underlying cause of the error can be retrieved via the
-     *          {@link Throwable#getCause()} method.
+     *          Throwable#getCause()} method.
      *
      * @revised  1.4
      */
@@ -1575,7 +1467,7 @@ public abstract class ClassLoader {
     // -- Package --
 
     /**
-     * Defines a package by name in this <tt>ClassLoader</tt>.  This allows
+     * Defines a package by name in this ClassLoader.  This allows
      * class loaders to define the packages for their classes. Packages must
      * be created before the class is defined, and package names must be
      * unique within a class loader and cannot be redefined or changed once
@@ -1603,11 +1495,11 @@ public abstract class ClassLoader {
      *         The implementation vendor
      *
      * @param  sealBase
-     *         If not <tt>null</tt>, then this package is sealed with
-     *         respect to the given code source {@link java.net.URL
-     *         <tt>URL</tt>}  object.  Otherwise, the package is not sealed.
+     *         If not null, then this package is sealed with
+     *         respect to the given code source java.net.URL
+     *         URL}  object.  Otherwise, the package is not sealed.
      *
-     * @return  The newly defined <tt>Package</tt> object
+     * @return  The newly defined Package object
      *
      * @throws  IllegalArgumentException
      *          If package name duplicates an existing package either in this
@@ -1635,14 +1527,14 @@ public abstract class ClassLoader {
     }
 
     /**
-     * Returns a <tt>Package</tt> that has been defined by this class loader
+     * Returns a Package that has been defined by this class loader
      * or any of its ancestors.  </p>
      *
      * @param  name
      *         The package name
      *
-     * @return  The <tt>Package</tt> corresponding to the given name, or
-     *          <tt>null</tt> if not found
+     * @return  The Package corresponding to the given name, or
+     *          null if not found
      *
      * @since  1.2
      */
@@ -1672,11 +1564,11 @@ public abstract class ClassLoader {
     }
 
     /**
-     * Returns all of the <tt>Packages</tt> defined by this class loader and
+     * Returns all of the Packages defined by this class loader and
      * its ancestors.  </p>
      *
-     * @return  The array of <tt>Package</tt> objects defined by this
-     *          <tt>ClassLoader</tt>
+     * @return  The array of Package objects defined by this
+     *          ClassLoader
      *
      * @since  1.2
      */
@@ -1708,9 +1600,9 @@ public abstract class ClassLoader {
     /**
      * Returns the absolute path name of a native library.  The VM invokes this
      * method to locate the native libraries that belong to classes loaded with
-     * this class loader. If this method returns <tt>null</tt>, the VM
+     * this class loader. If this method returns null, the VM
      * searches the library along the path specified as the
-     * "<tt>java.library.path</tt>" property.  </p>
+     * "java.library.path" property.  </p>
      *
      * @param  libname
      *         The library name
@@ -1729,12 +1621,12 @@ public abstract class ClassLoader {
     /**
      * The inner class NativeLibrary denotes a loaded native library instance.
      * Every classloader contains a vector of loaded native libraries in the
-     * private field <tt>nativeLibraries</tt>.  The native libraries loaded
-     * into the system are entered into the <tt>systemNativeLibraries</tt>
+     * private field nativeLibraries.  The native libraries loaded
+     * into the system are entered into the systemNativeLibraries
      * vector.
      *
-     * <p> Every native library requires a particular version of JNI. This is
-     * denoted by the private <tt>jniVersion</tt> field.  This field is set by
+     * Every native library requires a particular version of JNI. This is
+     * denoted by the private jniVersion field.  This field is set by
      * the VM when it loads the library, and used by the VM to pass the correct
      * version of JNI to the native methods.  </p>
      *
@@ -2021,12 +1913,12 @@ public abstract class ClassLoader {
      * determines whether classes loaded by this class loader and initialized
      * in the future will have assertions enabled or disabled by default.
      * This setting may be overridden on a per-package or per-class basis by
-     * invoking {@link #setPackageAssertionStatus(String, boolean)} or {@link
+     * invoking #setPackageAssertionStatus(String, boolean)} or 
      * #setClassAssertionStatus(String, boolean)}.  </p>
      *
      * @param  enabled
-     *         <tt>true</tt> if classes loaded by this class loader will
-     *         henceforth have assertions enabled by default, <tt>false</tt>
+     *         true if classes loaded by this class loader will
+     *         henceforth have assertions enabled by default, false
      *         if they will have assertions disabled by default.
      *
      * @since  1.4
@@ -2046,33 +1938,33 @@ public abstract class ClassLoader {
      * classes initialized in the future that belong to the named package or
      * any of its "subpackages".
      *
-     * <p> A subpackage of a package named p is any package whose name begins
-     * with "<tt>p.</tt>".  For example, <tt>javax.swing.text</tt> is a
-     * subpackage of <tt>javax.swing</tt>, and both <tt>java.util</tt> and
-     * <tt>java.lang.reflect</tt> are subpackages of <tt>java</tt>.
+     * A subpackage of a package named p is any package whose name begins
+     * with "p.".  For example, javax.swing.text is a
+     * subpackage of javax.swing, and both java.util and
+     * java.lang.reflect are subpackages of java.
      *
-     * <p> In the event that multiple package defaults apply to a given class,
+     * In the event that multiple package defaults apply to a given class,
      * the package default pertaining to the most specific package takes
-     * precedence over the others.  For example, if <tt>javax.lang</tt> and
-     * <tt>javax.lang.reflect</tt> both have package defaults associated with
+     * precedence over the others.  For example, if javax.lang and
+     * javax.lang.reflect both have package defaults associated with
      * them, the latter package default applies to classes in
-     * <tt>javax.lang.reflect</tt>.
+     * javax.lang.reflect.
      *
-     * <p> Package defaults take precedence over the class loader's default
+     * Package defaults take precedence over the class loader's default
      * assertion status, and may be overridden on a per-class basis by invoking
-     * {@link #setClassAssertionStatus(String, boolean)}.  </p>
+     * #setClassAssertionStatus(String, boolean)}.  </p>
      *
      * @param  packageName
      *         The name of the package whose package default assertion status
-     *         is to be set. A <tt>null</tt> value indicates the unnamed
+     *         is to be set. A null value indicates the unnamed
      *         package that is "current"
      *         (see section 7.4.2 of
      *         <cite>The Java&trade; Language Specification</cite>.)
      *
      * @param  enabled
-     *         <tt>true</tt> if classes loaded by this classloader and
+     *         true if classes loaded by this classloader and
      *         belonging to the named package or any of its subpackages will
-     *         have assertions enabled by default, <tt>false</tt> if they will
+     *         have assertions enabled by default, false if they will
      *         have assertions disabled by default.
      *
      * @since  1.4
@@ -2095,7 +1987,7 @@ public abstract class ClassLoader {
      * the named class has already been initialized.  (Once a class is
      * initialized, its assertion status cannot change.)
      *
-     * <p> If the named class is not a top-level class, this invocation will
+     * If the named class is not a top-level class, this invocation will
      * have no effect on the actual assertion status of any class. </p>
      *
      * @param  className
@@ -2103,8 +1995,8 @@ public abstract class ClassLoader {
      *         assertion status is to be set.
      *
      * @param  enabled
-     *         <tt>true</tt> if the named class is to have assertions
-     *         enabled when (and if) it is initialized, <tt>false</tt> if the
+     *         true if the named class is to have assertions
+     *         enabled when (and if) it is initialized, false if the
      *         class is to have assertions disabled.
      *
      * @since  1.4
@@ -2120,7 +2012,7 @@ public abstract class ClassLoader {
 
     /**
      * Sets the default assertion status for this class loader to
-     * <tt>false</tt> and discards any package defaults or class assertion
+     * false and discards any package defaults or class assertion
      * status settings associated with the class loader.  This method is
      * provided so that class loaders can be made to ignore any command line or
      * persistent assertion status settings and "start with a clean slate."

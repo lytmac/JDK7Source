@@ -225,14 +225,14 @@ public class ReentrantLock implements Lock, java.io.Serializable {
 
     /**
      * Acquires the lock.
-     * <p>
-     * <p>Acquires the lock if it is not held by another thread and returns
+     * 
+     * Acquires the lock if it is not held by another thread and returns
      * immediately, setting the lock hold count to one.
-     * <p>
-     * <p>If the current thread already holds the lock then the hold
+     * 
+     * If the current thread already holds the lock then the hold
      * count is incremented by one and the method returns immediately.
-     * <p>
-     * <p>If the lock is held by another thread then the
+     * 
+     * If the lock is held by another thread then the
      * current thread becomes disabled for thread scheduling
      * purposes and lies dormant until the lock has been acquired,
      * at which time the lock hold count is set to one.
@@ -244,44 +244,44 @@ public class ReentrantLock implements Lock, java.io.Serializable {
     /**
      * Acquires the lock unless the current thread is
      * {@linkplain Thread#interrupt interrupted}.
-     * <p>
-     * <p>Acquires the lock if it is not held by another thread and returns
+     * 
+     * Acquires the lock if it is not held by another thread and returns
      * immediately, setting the lock hold count to one.
-     * <p>
-     * <p>If the current thread already holds this lock then the hold count
+     * 
+     * If the current thread already holds this lock then the hold count
      * is incremented by one and the method returns immediately.
-     * <p>
-     * <p>If the lock is held by another thread then the
+     * 
+     * If the lock is held by another thread then the
      * current thread becomes disabled for thread scheduling
      * purposes and lies dormant until one of two things happens:
-     * <p>
+     * 
      * <ul>
-     * <p>
+     * 
      * <li>The lock is acquired by the current thread; or
-     * <p>
+     * 
      * <li>Some other thread {@linkplain Thread#interrupt interrupts} the
      * current thread.
-     * <p>
+     * 
      * </ul>
-     * <p>
-     * <p>If the lock is acquired by the current thread then the lock hold
+     * 
+     * If the lock is acquired by the current thread then the lock hold
      * count is set to one.
-     * <p>
-     * <p>If the current thread:
-     * <p>
+     * 
+     * If the current thread:
+     * 
      * <ul>
-     * <p>
+     * 
      * <li>has its interrupted status set on entry to this method; or
-     * <p>
+     * 
      * <li>is {@linkplain Thread#interrupt interrupted} while acquiring
      * the lock,
-     * <p>
+     * 
      * </ul>
-     * <p>
+     * 
      * then {@link InterruptedException} is thrown and the current thread's
      * interrupted status is cleared.
-     * <p>
-     * <p>In this implementation, as this method is an explicit
+     * 
+     * In this implementation, as this method is an explicit
      * interruption point, preference is given to responding to the
      * interrupt over normal or reentrant acquisition of the lock.
      *
@@ -294,8 +294,8 @@ public class ReentrantLock implements Lock, java.io.Serializable {
     /**
      * Acquires the lock only if it is not held by another thread at the time
      * of invocation.
-     * <p>
-     * <p>Acquires the lock if it is not held by another thread and
+     * 
+     * Acquires the lock if it is not held by another thread and
      * returns immediately with the value {@code true}, setting the
      * lock hold count to one. Even when this lock has been set to use a
      * fair ordering policy, a call to {@code tryLock()} <em>will</em>
@@ -306,11 +306,11 @@ public class ReentrantLock implements Lock, java.io.Serializable {
      * the fairness setting for this lock, then use
      * {@link #tryLock(long, TimeUnit) tryLock(0, TimeUnit.SECONDS) }
      * which is almost equivalent (it also detects interruption).
-     * <p>
-     * <p> If the current thread already holds this lock then the hold
+     * 
+     *  If the current thread already holds this lock then the hold
      * count is incremented by one and the method returns {@code true}.
-     * <p>
-     * <p>If the lock is held by another thread then this method will return
+     * 
+     * If the lock is held by another thread then this method will return
      * immediately with the value {@code false}.
      *
      * @return {@code true} if the lock was free and was acquired by the
@@ -327,58 +327,58 @@ public class ReentrantLock implements Lock, java.io.Serializable {
      * Acquires the lock if it is not held by another thread within the given
      * waiting time and the current thread has not been
      * {@linkplain Thread#interrupt interrupted}.
-     * <p>
-     * <p>Acquires the lock if it is not held by another thread and returns
+     * 
+     * Acquires the lock if it is not held by another thread and returns
      * immediately with the value {@code true}, setting the lock hold count
      * to one. If this lock has been set to use a fair ordering policy then
      * an available lock <em>will not</em> be acquired if any other threads
      * are waiting for the lock. This is in contrast to the {@link #tryLock()}
      * method. If you want a timed {@code tryLock} that does permit barging on
      * a fair lock then combine the timed and un-timed forms together:
-     * <p>
-     * <pre>if (lock.tryLock() || lock.tryLock(timeout, unit) ) { ... }
-     * </pre>
-     * <p>
-     * <p>If the current thread
+     * 
+     * if (lock.tryLock() || lock.tryLock(timeout, unit) ) { ... }
+     * 
+     * 
+     * If the current thread
      * already holds this lock then the hold count is incremented by one and
      * the method returns {@code true}.
-     * <p>
-     * <p>If the lock is held by another thread then the
+     * 
+     * If the lock is held by another thread then the
      * current thread becomes disabled for thread scheduling
      * purposes and lies dormant until one of three things happens:
-     * <p>
+     * 
      * <ul>
-     * <p>
+     * 
      * <li>The lock is acquired by the current thread; or
-     * <p>
+     * 
      * <li>Some other thread {@linkplain Thread#interrupt interrupts}
      * the current thread; or
-     * <p>
+     * 
      * <li>The specified waiting time elapses
-     * <p>
+     * 
      * </ul>
-     * <p>
-     * <p>If the lock is acquired then the value {@code true} is returned and
+     * 
+     * If the lock is acquired then the value {@code true} is returned and
      * the lock hold count is set to one.
-     * <p>
-     * <p>If the current thread:
-     * <p>
+     * 
+     * If the current thread:
+     * 
      * <ul>
-     * <p>
+     * 
      * <li>has its interrupted status set on entry to this method; or
-     * <p>
+     * 
      * <li>is {@linkplain Thread#interrupt interrupted} while
      * acquiring the lock,
-     * <p>
+     * 
      * </ul>
      * then {@link InterruptedException} is thrown and the current thread's
      * interrupted status is cleared.
-     * <p>
-     * <p>If the specified waiting time elapses then the value {@code false}
+     * 
+     * If the specified waiting time elapses then the value {@code false}
      * is returned.  If the time is less than or equal to zero, the method
      * will not wait at all.
-     * <p>
-     * <p>In this implementation, as this method is an explicit
+     * 
+     * In this implementation, as this method is an explicit
      * interruption point, preference is given to responding to the
      * interrupt over normal or reentrant acquisition of the lock, and
      * over reporting the elapse of the waiting time.
@@ -399,8 +399,8 @@ public class ReentrantLock implements Lock, java.io.Serializable {
 
     /**
      * Attempts to release this lock.
-     * <p>
-     * <p>If the current thread is the holder of this lock then the hold
+     * 
+     * If the current thread is the holder of this lock then the hold
      * count is decremented.  If the hold count is now zero then the lock
      * is released.  If the current thread is not the holder of this
      * lock then {@link IllegalMonitorStateException} is thrown.
@@ -415,38 +415,38 @@ public class ReentrantLock implements Lock, java.io.Serializable {
     /**
      * Returns a {@link Condition} instance for use with this
      * {@link Lock} instance.
-     * <p>
-     * <p>The returned {@link Condition} instance supports the same
+     * 
+     * The returned {@link Condition} instance supports the same
      * usages as do the {@link Object} monitor methods ({@link
      * Object#wait() wait}, {@link Object#notify notify}, and {@link
      * Object#notifyAll notifyAll}) when used with the built-in
      * monitor lock.
-     * <p>
+     * 
      * <ul>
-     * <p>
+     * 
      * <li>If this lock is not held when any of the {@link Condition}
      * {@linkplain Condition#await() waiting} or {@linkplain
      * Condition#signal signalling} methods are called, then an {@link
      * IllegalMonitorStateException} is thrown.
-     * <p>
+     * 
      * <li>When the condition {@linkplain Condition#await() waiting}
      * methods are called the lock is released and, before they
      * return, the lock is reacquired and the lock hold count restored
      * to what it was when the method was called.
-     * <p>
+     * 
      * <li>If a thread is {@linkplain Thread#interrupt interrupted}
      * while waiting then the wait will terminate, an {@link
      * InterruptedException} will be thrown, and the thread's
      * interrupted status will be cleared.
-     * <p>
+     * 
      * <li> Waiting threads are signalled in FIFO order.
-     * <p>
+     * 
      * <li>The ordering of lock reacquisition for threads returning
      * from waiting methods is the same as for threads initially
      * acquiring the lock, which is in the default case not specified,
      * but for <em>fair</em> locks favors those threads that have been
      * waiting the longest.
-     * <p>
+     * 
      * </ul>
      *
      * @return the Condition object
@@ -457,16 +457,16 @@ public class ReentrantLock implements Lock, java.io.Serializable {
 
     /**
      * Queries the number of holds on this lock by the current thread.
-     * <p>
-     * <p>A thread has a hold on a lock for each lock action that is not
+     * 
+     * A thread has a hold on a lock for each lock action that is not
      * matched by an unlock action.
-     * <p>
-     * <p>The hold count information is typically only used for testing and
+     * 
+     * The hold count information is typically only used for testing and
      * debugging purposes. For example, if a certain section of code should
      * not be entered with the lock already held then we can assert that
      * fact:
-     * <p>
-     * <pre>
+     * 
+     * 
      * class X {
      *   ReentrantLock lock = new ReentrantLock();
      *   // ...
@@ -480,7 +480,7 @@ public class ReentrantLock implements Lock, java.io.Serializable {
      *     }
      *   }
      * }
-     * </pre>
+     * 
      *
      * @return the number of holds on this lock by the current thread,
      * or zero if this lock is not held by the current thread
@@ -491,13 +491,13 @@ public class ReentrantLock implements Lock, java.io.Serializable {
 
     /**
      * Queries if this lock is held by the current thread.
-     * <p>
-     * <p>Analogous to the {@link Thread#holdsLock} method for built-in
+     * 
+     * Analogous to the {@link Thread#holdsLock} method for built-in
      * monitor locks, this method is typically used for debugging and
      * testing. For example, a method that should only be called while
      * a lock is held can assert that this is the case:
-     * <p>
-     * <pre>
+     * 
+     * 
      * class X {
      *   ReentrantLock lock = new ReentrantLock();
      *   // ...
@@ -507,12 +507,12 @@ public class ReentrantLock implements Lock, java.io.Serializable {
      *       // ... method body
      *   }
      * }
-     * </pre>
-     * <p>
-     * <p>It can also be used to ensure that a reentrant lock is used
+     * 
+     * 
+     * It can also be used to ensure that a reentrant lock is used
      * in a non-reentrant manner, for example:
-     * <p>
-     * <pre>
+     * 
+     * 
      * class X {
      *   ReentrantLock lock = new ReentrantLock();
      *   // ...
@@ -527,7 +527,7 @@ public class ReentrantLock implements Lock, java.io.Serializable {
      *       }
      *   }
      * }
-     * </pre>
+     * 
      *
      * @return {@code true} if current thread holds this lock and
      * {@code false} otherwise
@@ -537,9 +537,8 @@ public class ReentrantLock implements Lock, java.io.Serializable {
     }
 
     /**
-     * Queries if this lock is held by any thread. This method is
-     * designed for use in monitoring of the system state,
-     * not for synchronization control.
+     * Queries if this lock is held by any thread.
+     * This method is designed for use in monitoring of the system state, not for synchronization control.
      *
      * @return {@code true} if any thread holds this lock and
      * {@code false} otherwise
@@ -551,7 +550,6 @@ public class ReentrantLock implements Lock, java.io.Serializable {
     /**
      * Returns {@code true} if this lock has fairness set true.
      *
-     * @return {@code true} if this lock has fairness set true
      */
     public final boolean isFair() {
         return sync instanceof FairSync;
