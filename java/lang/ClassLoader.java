@@ -116,7 +116,7 @@ import sun.security.util.SecurityConstants;
  *
  * Binary names
  *
- * Any class name provided as a String parameter to methods in ClassLoader must be a binary name as defined by 《The Java Language Specification》.
+ * Any class name provided as a String parameter to methods in ClassLoader must be a binary name as defined by <<The Java Language Specification>>.
  *
  * Examples of valid class names include:
  * "java.lang.String"
@@ -135,7 +135,7 @@ public abstract class ClassLoader {
         registerNatives();
     }
 
-    // The parent class loader for delegation
+    // The parent class loader for delegation：如果要实现父类加载器委派模型(见loadClass())，这里要设置父类。而不是采用继承某个类加载器的方式。
     // Note: VM hardcoded the offset of this field, thus all new fields must be added *after* it.
     private final ClassLoader parent;
 
@@ -263,7 +263,7 @@ public abstract class ClassLoader {
     // -- Class --
 
     /**
-     * Loads the class with the specified binary name. This method searches for classes in the same manner as the  loadClass(String, boolean) method.
+     * Loads the class with the specified binary name. This method searches for classes in the same manner as the loadClass(String, boolean) method.
      * It is invoked by the Java virtual machine to resolve class references. Invoking this method is equivalent to invoking loadClass(name, false).
      *
      * @param  name The binary name of the class
@@ -286,8 +286,8 @@ public abstract class ClassLoader {
      *
      *   3. Invoke the findClass(String) method to find the class.
      *
-     * If the class was found using the above steps, and the resolve flag is true, this method will then invoke the resolveClass(Class) method on the
-     * resulting Class object.
+     * If the class was found using the above steps, and the resolve flag is true, this method will then invoke the resolveClass(Class) method on
+     * the resulting Class object.
      *
      * Subclasses of ClassLoader are encouraged to override findClass(String), rather than this method.
      *
@@ -337,20 +337,15 @@ public abstract class ClassLoader {
     }
 
     /**
-     * Returns the lock object for class loading operations.
-     * For backward compatibility, the default implementation of this method
-     * behaves as follows. If this ClassLoader object is registered as
-     * parallel capable, the method returns a dedicated object associated
-     * with the specified class name. Otherwise, the method returns this
-     * ClassLoader object. </p>
+     * Returns the lock object for class loading operations. For backward compatibility, the default implementation of this method behaves
+     * as follows. If this ClassLoader object is registered as parallel capable, the method returns a dedicated object associated with the
+     * specified class name. Otherwise, the method returns this ClassLoader object.
      *
-     * @param  className
-     *         The name of the to-be-loaded class
+     * @param  className The name of the to-be-loaded class
      *
      * @return the lock for class loading operations
      *
-     * @throws NullPointerException
-     *         If registered as parallel capable and className is null
+     * @throws NullPointerException If registered as parallel capable and className is null
      *
      * @see #loadClass(String, boolean)
      *
@@ -372,8 +367,7 @@ public abstract class ClassLoader {
     private Class loadClassInternal(String name)
         throws ClassNotFoundException
     {
-        // For backward compatibility, explicitly lock on 'this' when
-        // the current class loader is not parallel capable.
+        // For backward compatibility, explicitly lock on 'this' when the current class loader is not parallel capable.
         if (parallelLockMap == null) {
             synchronized (this) {
                  return loadClass(name);
@@ -409,20 +403,15 @@ public abstract class ClassLoader {
     }
 
     /**
-     * Finds the class with the specified <a href="#name">binary name</a>.
-     * This method should be overridden by class loader implementations that
-     * follow the delegation model for loading classes, and will be invoked by
-     * the #loadClass loadClass} method after checking the
-     * parent class loader for the requested class.  The default implementation
-     * throws a ClassNotFoundException.  </p>
+     * Finds the class with the specified binary name. This method should be overridden by class loader implementations that follow the
+     * delegation model for loading classes, and will be invoked by the loadClass method after checking the parent class loader for the
+     * requested class. The default implementation throws a ClassNotFoundException.
      *
-     * @param  name
-     *         The <a href="#name">binary name</a> of the class
+     * @param  name The binary name of the class
      *
      * @return  The resulting Class object
      *
-     * @throws  ClassNotFoundException
-     *          If the class could not be found
+     * @throws  ClassNotFoundException If the class could not be found
      *
      * @since  1.2
      */
@@ -431,39 +420,25 @@ public abstract class ClassLoader {
     }
 
     /**
-     * Converts an array of bytes into an instance of class Class.
-     * Before the Class can be used it must be resolved.  This method
-     * is deprecated in favor of the version that takes a <a
-     * href="#name">binary name</a> as its first argument, and is more secure.
+     * Converts an array of bytes into an instance of class Class. Before the Class can be used it must be resolved. This method is deprecated
+     * in favor of the version that takes a binary name as its first argument, and is more secure.
      *
-     * @param  b
-     *         The bytes that make up the class data.  The bytes in positions
-     *         off through off+len-1 should have the format
-     *         of a valid class file as defined by
-     *         <cite>The Java&trade; Virtual Machine Specification</cite>.
+     * @param  b The bytes that make up the class data. The bytes in positions off through off+len-1 should have the format of a valid class file
+     *          as defined by <<The Java Virtual Machine Specification>>.
      *
-     * @param  off
-     *         The start offset in b of the class data
+     * @param  off The start offset in b of the class data
      *
-     * @param  len
-     *         The length of the class data
+     * @param  len The length of the class data
      *
-     * @return  The Class object that was created from the specified
-     *          class data
+     * @return  The Class object that was created from the specified class data
      *
-     * @throws  ClassFormatError
-     *          If the data did not contain a valid class
+     * @throws  ClassFormatError If the data did not contain a valid class
      *
-     * @throws  IndexOutOfBoundsException
-     *          If either off or len is negative, or if
-     *          off+len is greater than b.length.
+     * @throws  IndexOutOfBoundsException If either off or len is negative, or if off+len is greater than b.length.
      *
-     * @throws  SecurityException
-     *          If an attempt is made to add this class to a package that
-     *          contains classes that were signed by a different set of
-     *          certificates than this class, or if an attempt is made
-     *          to define a class in a package with a fully-qualified name
-     *          that starts with "{@code java.}".
+     * @throws  SecurityException If an attempt is made to add this class to a package that contains classes that were signed by a different set
+     *          of certificates than this class, or if an attempt is made to define a class in a package with a fully-qualified name that starts
+     *          with "java".
      *
      * @see  #loadClass(String, boolean)
      * @see  #resolveClass(Class)
@@ -473,62 +448,36 @@ public abstract class ClassLoader {
      */
     @Deprecated
     //final修饰表明该方法不能再被重写了。因为没有别的计算方式将字节码转换成Class对象了。
-    protected final Class<?> defineClass(byte[] b, int off, int len)
-        throws ClassFormatError
-    {
+    protected final Class<?> defineClass(byte[] b, int off, int len) throws ClassFormatError {
         return defineClass(null, b, off, len, null);
     }
 
     /**
-     * Converts an array of bytes into an instance of class Class.
-     * Before the Class can be used it must be resolved.
+     * Converts an array of bytes into an instance of class Class. Before the Class can be used it must be resolved.
      *
-     * This method assigns a default java.security.ProtectionDomain
-     * ProtectionDomain} to the newly defined class.  The
-     * ProtectionDomain is effectively granted the same set of
-     * permissions returned when 
-     * java.security.Policy#getPermissions(java.security.CodeSource)
-     * Policy.getPolicy().getPermissions(new CodeSource(null, null))}
-     * is invoked.  The default domain is created on the first invocation of
-     * #defineClass(String, byte[], int, int) defineClass},
-     * and re-used on subsequent invocations.
+     * This method assigns a default java.security.ProtectionDomain to the newly defined class. The ProtectionDomain is effectively granted the
+     * same set of permissions returned when java.security.Policy.getPolicy().getPermissions(new CodeSource(null, null)) is invoked. The default
+     * domain is created on the first invocation of defineClass(String, byte[], int, int) defineClass, and re-used on subsequent invocations.
      *
-     * To assign a specific ProtectionDomain to the class, use
-     * the #defineClass(String, byte[], int, int,
-     * java.security.ProtectionDomain) defineClass} method that takes a
-     * ProtectionDomain as one of its arguments.  </p>
+     * To assign a specific ProtectionDomain to the class, use the defineClass method that takes a ProtectionDomain as one of its arguments.
      *
-     * @param  name
-     *         The expected <a href="#name">binary name</a> of the class, or
-     *         null if not known
+     * @param  name The expected binary name of the class, or null if not known
      *
-     * @param  b
-     *         The bytes that make up the class data.  The bytes in positions
-     *         off through off+len-1 should have the format
-     *         of a valid class file as defined by
-     *         <cite>The Java&trade; Virtual Machine Specification</cite>.
+     * @param  b The bytes that make up the class data. The bytes in positions off through off+len-1 should have the format of a valid class
+     *           file as defined by <<The Java Virtual Machine Specification>>.
      *
-     * @param  off
-     *         The start offset in b of the class data
+     * @param  off The start offset in b of the class data
      *
-     * @param  len
-     *         The length of the class data
+     * @param  len The length of the class data
      *
-     * @return  The Class object that was created from the specified
-     *          class data.
+     * @return  The Class object that was created from the specified class data.
      *
-     * @throws  ClassFormatError
-     *          If the data did not contain a valid class
+     * @throws  ClassFormatError If the data did not contain a valid class
      *
-     * @throws  IndexOutOfBoundsException
-     *          If either off or len is negative, or if
-     *          off+len is greater than b.length.
+     * @throws  IndexOutOfBoundsException If either off or len is negative, or if off+len is greater than b.length.
      *
-     * @throws  SecurityException
-     *          If an attempt is made to add this class to a package that
-     *          contains classes that were signed by a different set of
-     *          certificates than this class (which is unsigned), or if
-     *          name begins with "java.".
+     * @throws  SecurityException If an attempt is made to add this class to a package that contains classes that were signed by a different
+     *                            set of certificates than this class (which is unsigned), or if name begins with "java".
      *
      * @see  #loadClass(String, boolean)
      * @see  #resolveClass(Class)
@@ -537,20 +486,15 @@ public abstract class ClassLoader {
      *
      * @since  1.1
      */
-    protected final Class<?> defineClass(String name, byte[] b, int off, int len)
-        throws ClassFormatError
-    {
+    protected final Class<?> defineClass(String name, byte[] b, int off, int len) throws ClassFormatError {
         return defineClass(name, b, off, len, null);
     }
 
     /* Determine protection domain, and check that:
         - not define java.* class,
-        - signer of this class matches signers for the rest of the classes in
-          package.
+        - signer of this class matches signers for the rest of the classes in package.
     */
-    private ProtectionDomain preDefineClass(String name,
-                                            ProtectionDomain pd)
-    {
+    private ProtectionDomain preDefineClass(String name, ProtectionDomain pd) {
         if (!checkName(name))
             throw new NoClassDefFoundError("IllegalName: " + name);
 
@@ -583,9 +527,7 @@ public abstract class ClassLoader {
                                          ClassFormatError cfe, String source)
       throws ClassFormatError
     {
-        // Class format error - try to transform the bytecode and
-        // define the class again
-        //
+        // Class format error - try to transform the bytecode and define the class again
         ClassFileTransformer[] transformers =
             ClassFileTransformer.getTransformers();
         Class c = null;
@@ -637,19 +579,19 @@ public abstract class ClassLoader {
      * package must contain the same set of certificates or a
      * SecurityException will be thrown.  Note that if
      * name is null, this check is not performed.
-     * You should always pass in the <a href="#name">binary name</a> of the
+     * You should always pass in the binary name of the
      * class you are defining as well as the bytes.  This ensures that the
      * class you are defining is indeed the class you think it is.
      *
      * The specified name cannot begin with "java.", since
      * all classes in the "java.* packages can only be defined by the
      * bootstrap class loader.  If name is not null, it
-     * must be equal to the <a href="#name">binary name</a> of the class
+     * must be equal to the binary name of the class
      * specified by the byte array "b", otherwise a 
      * NoClassDefFoundError} will be thrown.  </p>
      *
      * @param  name
-     *         The expected <a href="#name">binary name</a> of the class, or
+     *         The expected binary name of the class, or
      *         null if not known
      *
      * @param  b
@@ -674,8 +616,8 @@ public abstract class ClassLoader {
      *          If the data did not contain a valid class
      *
      * @throws  NoClassDefFoundError
-     *          If name is not equal to the <a href="#name">binary
-     *          name</a> of the class specified by b
+     *          If name is not equal to the binary
+     *          name of the class specified by b
      *
      * @throws  IndexOutOfBoundsException
      *          If either off or len is negative, or if
@@ -737,7 +679,7 @@ public abstract class ClassLoader {
      * </blockquote>
      *
      * @param  name
-     *         The expected <a href="#name">binary name</a>. of the class, or
+     *         The expected binary name. of the class, or
      *         null if not known
      *
      * @param  b
@@ -756,8 +698,8 @@ public abstract class ClassLoader {
      *          If the data did not contain a valid class.
      *
      * @throws  NoClassDefFoundError
-     *          If name is not equal to the <a href="#name">binary
-     *          name</a> of the class specified by b
+     *          If name is not equal to the binary
+     *          name of the class specified by b
      *
      * @throws  SecurityException
      *          If an attempt is made to add this class to a package that
@@ -966,13 +908,13 @@ public abstract class ClassLoader {
     private native Class findBootstrapClass(String name);
 
     /**
-     * Returns the class with the given <a href="#name">binary name</a> if this
+     * Returns the class with the given binary name if this
      * loader has been recorded by the Java virtual machine as an initiating
-     * loader of a class with that <a href="#name">binary name</a>.  Otherwise
+     * loader of a class with that binary name.  Otherwise
      * null is returned.  </p>
      *
      * @param  name
-     *         The <a href="#name">binary name</a> of the class
+     *         The binary name of the class
      *
      * @return  The Class object, or null if the class has
      *          not been loaded

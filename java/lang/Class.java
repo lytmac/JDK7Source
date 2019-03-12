@@ -625,12 +625,10 @@ public final class Class<T> implements java.io.Serializable,
 
 
     /**
-     * Returns the Class} representing the component type of an
-     * array.  If this class does not represent an array class this method
+     * Returns the Class representing the component type of an array. If this class does not represent an array class this method
      * returns null.
      *
-     * @return the Class} representing the component type of this
-     * class if this class is an array
+     * @return the Class representing the component type of this class if this class is an array
      * @see     java.lang.reflect.Array
      * @since JDK1.1
      */
@@ -660,7 +658,7 @@ public final class Class<T> implements java.io.Serializable,
      * The modifier encodings are defined in <em>The Java Virtual Machine
      * Specification</em>, table 4.1.
      *
-     * @return the int} representing the modifiers for this class
+     * @return the int representing the modifiers for this class
      * @see     java.lang.reflect.Modifier
      * @since JDK1.1
      */
@@ -1844,38 +1842,19 @@ public final class Class<T> implements java.io.Serializable,
     }
 
     /**
-     * Finds a resource with a given name.  The rules for searching resources
-     * associated with a given class are implemented by the defining
-     * {@linkplain ClassLoader class loader} of the class.  This method
-     * delegates to this object's class loader.  If this object was loaded by
-     * the bootstrap class loader, the method delegates to {@link
-     * ClassLoader#getSystemResourceAsStream}.
+     * Finds a resource with a given name. The rules for searching resources associated with a given class are implemented by the defining
+     * ClassLoader of the class. This method delegates to this object's class loader. If this object was loaded by the bootstrap class loader,
+     * the method delegates to ClassLoader.getSystemResourceAsStream.
      *
-     * Before delegation, an absolute resource name is constructed from the
-     * given resource name using this algorithm:
+     * Before delegation, an absolute resource name is constructed from the given resource name using this algorithm:
      *
-     * <ul>
-     *
-     * <li> If the name} begins with a '/'}
-     * (<tt>'&#92;u002f'</tt>), then the absolute name of the resource is the
-     * portion of the name} following the '/'}.
-     *
-     * <li> Otherwise, the absolute name is of the following form:
-     *
-     * <blockquote>
-     *   modified_package_name/name}
-     * </blockquote>
-     *
-     * Where the modified_package_name} is the package name of this
-     * object with '/'} substituted for '.'}
-     * (<tt>'&#92;u002e'</tt>).
-     *
-     * </ul>
+     * If the name begins with a '/' , then the absolute name of the resource is the portion of the name following the '/'. Otherwise, the
+     * absolute name is of the following form: modified_package_name/name. Where the modified_package_name is the package name of this object
+     * with '/' substituted for '.'.
      *
      * @param  name name of the desired resource
-     * @return      A {@link java.io.InputStream} object or null} if
-     *              no resource with this name is found
-     * @throws  NullPointerException If name} is null}
+     * @return      A java.io.InputStream object or null if no resource with this name is found
+     * @throws  NullPointerException If name is null
      * @since  JDK1.1
      */
      public InputStream getResourceAsStream(String name) {
